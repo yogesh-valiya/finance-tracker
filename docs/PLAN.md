@@ -2,7 +2,7 @@
 
 > **Plan Version**: 1.2.0  
 > **Target Architecture**: Mobile-First PWA & Android Native (Capacitor 6+), React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Zustand, PocketBase (Local Dev Instance & pb_hooks Cron)  
-> **Governing Rules**: `.agents/rules/001-styling.md`, `.agents/rules/002-core-invariants.md`, `.agents/rules/003-development-standards.md`, `.agents/rules/011-financial-math.md`, `.agents/rules/012-capacitor-mobile-ux.md`, `.agents/rules/013-performance-and-feeds.md`  
+> **Governing Rules**: `.agents/rules/001-styling.md`, `.agents/rules/002-development-standards.md`, `.agents/rules/003-creative-design-thinking.md`, `.agents/rules/011-financial-math.md`, `.agents/rules/012-capacitor-mobile-ux.md`, `.agents/rules/013-performance-and-feeds.md`  
 > **Mandatory Phase Workflows**: `.agents/workflows/check-shadcn-compliance.md`, `.agents/workflows/compare-screen-vs-reference.md`  
 > **Progress & Audit Directory**: `./progress/` (Logs, Progress Dashboard, and `./progress/screenshots/`)
 
@@ -50,6 +50,23 @@ All progress tracking, compliance audit reports, visual review verdicts, and cap
 | **Row Action Buttons** | `size-7` (28×28px) | `size-3.5` | Ghost/outline buttons for edit, move, delete |
 | **Form Inputs & Select Triggers** | `h-7` to `h-9` (28–36px) | `text-xs` font | Right-aligned values, minimal borders in table lists |
 | **Toggle Switches** | Compact scale | `Switch` primitive | Right-aligned in unified preference rows |
+
+### 4. Creative Design Thinking & Mobile Data Density Principles (Rule 003 Summary)
+- **Design Thinking Over Blind Copying**: Treat reference images, sketches, and mockups as functional blueprints and intent specifications—NOT as rigid pixel templates to slavishly clone. Understand the *why* behind the layout, then elevate the execution with modern UX patterns, superior ergonomics, and thoughtful polish.
+- **Data Density with Visual Clarity**:
+  - **High Information Scent & Scannability**: Maximize usable data density on mobile viewports (360–430px) without clutter. Group related metrics logically, use subtle borders/dividers, and establish clear typographic contrast.
+  - **Glanceable Intelligence**: Use smart visual cues (status pills, trend indicators, micro-progress bars, category color accents) so users understand financial state in milliseconds.
+  - **Tabular & Aligned Presentation**: Always align numerical and monetary values with `tabular-nums` and right-alignment for effortless vertical comparison.
+- **Proactive & Comprehensive State Design**:
+  - Never design only the "happy path" shown in a reference image.
+  - Creatively design and handle all operational states: zero/empty states (with helpful onboarding CTAs), loading skeletons matching exact dense layouts, inline error validations, search miss states, and partial/extreme data values (e.g. very large balances, long category names with ellipsis).
+- **Modern Mobile & PWA Interaction Patterns**:
+  - **Tactile Micro-Interactions**: Incorporate snappy active states, subtle transitions, and intuitive feedback for touches and gestures.
+  - **Ergonomic Action Placement**: Place frequent primary actions (e.g., Quick Add, Filter Chips, Numpad buttons) within easy thumb reach.
+  - **Contextual Workflows**: Use full-height bottom sheets, progressive disclosure, and contextual menus rather than burying actions in nested modals or confusing navigation trees.
+- **Harmonious Innovation within Design System Rules**:
+  - Creative enhancements must strictly respect the shadcn component library (`.agents/rules/001-styling.md`), mobile spacing invariants (`.agents/rules/004-spacing-and-density.md`), and financial arithmetic integrity (`.agents/rules/011-financial-math.md`).
+  - Do NOT introduce decorative fluff, oversized margins, or gratuitous whitespace that degrades data density. Innovation must serve clarity, speed, and user utility.
 
 ---
 

@@ -1,0 +1,10 @@
+Analyze each referenced screenshot image. For each one, write a self-contained description block (one block per screen) that lets a dev agent decide layout/positioning itself — avoid describing *where* elements are placed (e.g. "top-left", "below the header"), since the design needs to adapt to desktop view too. Structure each block as:
+- **Purpose**: what this screen is for, in one or two sentences
+- **Elements**: a list of what's on the screen (components, text, icons, inputs, etc.) — described by what they are and contain, not where they sit. If an element matches a pattern already described in another screen's block, reference it (e.g. "same card component as Screen 2") instead of re-describing it
+- **Content vs. placeholder**: note which visible text/numbers are real example data worth preserving vs. generic placeholder (e.g. "Lorem ipsum", "John Doe") that shouldn't be treated as spec
+- **States**: if the screenshot only shows one state (e.g. populated/default), note that explicitly and specify whether other states (empty, loading, error, disabled) should be inferred or left undefined
+- **Expected behavior**: what happens on interaction (taps, inputs, state changes) for each element that has one
+- **Navigation**: how the user arrives at this screen, and where key actions lead (e.g. "Save returns to previous screen", "Continue navigates to Screen X")
+- **Responsive priority**: what should stay most visible/prominent on small screens, as a hint for adapting the layout to larger viewports
+
+You may use existing descriptions already present, but capture every important detail so the images are no longer needed once this is done. Fold this content into **functional-guide.md**, which should become the single source of truth for these screens — write it so that **requirement.md** is no longer needed and can be removed once the merge is complete.

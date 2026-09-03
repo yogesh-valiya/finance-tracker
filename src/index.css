@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   THEME CONFIGURATION FILE (SHADCN DEFAULT LIGHT THEME — ZINC)
+   Single source of truth. Modify any CSS variables below to customize anytime.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* ------------------------------------------------------------------------
+       SHADCN OFFICIAL DEFAULT LIGHT PALETTE (ui.shadcn.com)
+       ------------------------------------------------------------------------ */
+    --background: 0 0% 100%;              /* #ffffff - Pure White Canvas */
+    --foreground: 240 10% 3.9%;           /* #09090b - Deep Jet Black Text */
+
+    --card: 0 0% 100%;                    /* #ffffff - Pure White Card Surface */
+    --card-foreground: 240 10% 3.9%;      /* #09090b */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;              /* #18181b - Iconic Solid Black Button */
+    --primary-foreground: 0 0% 98%;       /* #fafafa - Crisp White Label */
+
+    --secondary: 240 4.8% 95.9%;          /* #f4f4f5 - Light Zinc Surface */
+    --secondary-foreground: 240 5.9% 10%; /* #18181b */
+
+    --muted: 240 4.8% 95.9%;              /* #f4f4f5 */
+    --muted-foreground: 240 3.8% 46.1%;   /* #71717a - Readable Zinc Subtitles */
+
+    --accent: 240 4.8% 95.9%;             /* #f4f4f5 */
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;         /* #ef4444 */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;               /* #e4e4e7 - Crisp Hairline Border */
+    --input: 240 5.9% 90%;                /* #e4e4e7 */
+    --ring: 240 5.9% 10%;
+
+    --radius: 0.5rem;
+
+    /* ------------------------------------------------------------------------
+       FINANCIAL SEMANTIC TOKENS: SET A (Income: Blue, Expense: Red)
+       ------------------------------------------------------------------------ */
+    --income: 221.2 83.2% 53.3%;          /* #2563eb - Blue 600 */
+    --income-foreground: 0 0% 100%;
+    --income-muted: 214 95% 93%;          /* Soft Pastel Blue Badge */
+
+    --expense: 0 84.2% 60.2%;             /* #ef4444 - Red 500 */
+    --expense-foreground: 0 0% 100%;
+    --expense-muted: 0 93% 94%;           /* Soft Pastel Red Badge */
+
+    --transfer: 240 3.8% 46.1%;           /* #71717a - Neutral Zinc */
+    --transfer-foreground: 0 0% 100%;
+  }
+
+  /* --------------------------------------------------------------------------
+     OPTIONAL DARK THEME TOKENS (when class "dark" is explicitly applied)
+     -------------------------------------------------------------------------- */
+  .dark {
+    --background: 240 10% 3.9%;           /* #09090b */
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 5.5%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 5.5%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 45%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
+    --income: 213 94% 68%;
+    --income-foreground: 240 10% 3.9%;
+    --income-muted: 217 91% 15%;
+
+    --expense: 0 91% 71%;
+    --expense-foreground: 240 10% 3.9%;
+    --expense-muted: 0 74% 15%;
+
+    --transfer: 217 19% 65%;
+    --transfer-foreground: 240 10% 3.9%;
+  }
+
+  /* --------------------------------------------------------------------------
+     FINANCIAL COLOR SCHEME: SET B (Income: Red, Expense: Blue)
+     -------------------------------------------------------------------------- */
+  .color-scheme-b {
+    --income: 0 84.2% 60.2%;
+    --income-foreground: 0 0% 100%;
+    --income-muted: 0 93% 94%;
+
+    --expense: 221.2 83.2% 53.3%;
+    --expense-foreground: 0 0% 100%;
+    --expense-muted: 214 95% 93%;
+  }
+
+  .dark .color-scheme-b {
+    --income: 0 91% 71%;
+    --income-foreground: 240 10% 3.9%;
+    --income-muted: 0 74% 15%;
+
+    --expense: 213 94% 68%;
+    --expense-foreground: 240 10% 3.9%;
+    --expense-muted: 217 91% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Touch and scroll styling */
+.touch-pan-y {
+  touch-action: pan-y;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe Area Insets for Mobile / Capacitor */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+.pb-nav {
+  padding-bottom: calc(3.5rem + max(env(safe-area-inset-bottom), 0px));
+}
+
+/* Tabular figures for aligned financial numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,11 +1,10 @@
 # Visual Review & Reference Parity Log
 
-> **Workflow**: [.agents/workflows/compare-screen-vs-reference.md](file:///home/encora/explorer/expense-tracker-4/.agents/workflows/compare-screen-vs-reference.md)  
+> **Workflow**: [.agents/workflows/compare-screen-vs-reference.md](file:///home/encora/explorer/finance-tracker/.agents/workflows/compare-screen-vs-reference.md)  
 > **Reference Screens**: `docs/screens/` (61 reference design screenshots)  
 > **Live Captures Directory**: `progress/screenshots/`  
 > **Mandate**: **Must compare screenshots reference and current system, not just snapshot via playwright**  
 > **Purpose**: Tracks headless browser screenshot captures of live PWA screens, visual comparisons against `docs/screens/`, verdicts (**Same** / **Better** / **Worse**), and concrete design polish tasks.
-
 
 ---
 
@@ -13,7 +12,10 @@
 
 | Date | Phase | Screen Name | Route / URL | Reference Image | Live Capture | Verdict | Suggested / Applied Fixes |
 |---|---|---|---|---|---|---|---|
-| *Pending* | Phase 0 | Base Theme Shell | `/` | Base Theme Spec | `progress/screenshots/phase0-theme-shell.png` | - | - |
+| 2026-09-03 | Phase 0 | Base Theme Shell | `/trans` | Base Mobile Spec | `progress/screenshots/phase0-theme-shell.png` | **Better** | High data density, mobile-first framing, tabular-nums balances |
+| 2026-09-03 | Phase 1 | Sign-In Screen | `/login` | Auth Spec | `progress/screenshots/phase1-login.png` | **Better** | Quick 1-tap demo login button, clean shadcn Card & Input tokens |
+| 2026-09-03 | Phase 1 | Registration Screen | `/register` | Auth Spec | `progress/screenshots/phase1-register.png` | **Better** | Base currency selector dropdown with automatic master data seeding |
+| 2026-09-03 | Phase 1 | Settings & More Hub | `/more` | `more_01_settings_menu.jpg` | `progress/screenshots/more_01_settings_menu.png` | **Same** | Accurate 9-tile grid layout, Set A/B color scheme toggle |
 
 ---
 
@@ -22,52 +24,44 @@
 ### Phase 0: Foundations, Design System & Financial Math Core
 
 #### Base Mobile Container & Theme Shell
-- **Route**: `/`
+- **Route**: `/trans`
 - **Reference Spec**: Mobile viewport 360–430px with safe areas & theme tokens
 - **Live Screenshot**: `progress/screenshots/phase0-theme-shell.png`
-- **Verdict**: *Pending Phase 0 execution*
+- **Verdict**: **Better**
 - **Visual Comparison Notes**:
-  - *Layout & Spacing*: -
-  - *Component Fidelity*: -
-  - *Theme Tokens & Typography*: -
-- **Actionable Improvements Applied**: -
+  - *Layout & Spacing*: Clean centered mobile shell (390px viewport width) on desktop backdrop, persistent 4-tab bottom navigation with safe-area spacing (`env(safe-area-inset-bottom)`).
+  - *Component Fidelity*: High information scent, dense multi-account list with icons, group classification subheadings, and color-coded transaction badges.
+  - *Theme Tokens & Typography*: Inter typography scale, monospace right-aligned `tabular-nums` currency values (`₹ 1,85,450.00`, `₹ -3,50,000.00`).
+- **Actionable Improvements Applied**: Included subtle border dividers and shadow-2xs for tactile scannability.
 
 ---
 
-### Phase 1: Authentication & App Lock
-*(Awaiting Phase 1 execution)*
+### Phase 1: Authentication, Onboarding & Master Data Seeding
 
----
+#### 1. Sign-In Screen
+- **Route**: `/login`
+- **Reference Spec**: Gated auth, email/password, demo login option
+- **Live Screenshot**: `progress/screenshots/phase1-login.png`
+- **Verdict**: **Better**
+- **Visual Comparison Notes**:
+  - *Layout & Spacing*: Centered compact login card with brand logo badge, clear typographic hierarchy.
+  - *Component Fidelity*: Uses shadcn `Input`, `Label`, `Button`, `Alert` with inline error validation.
+  - *Innovations*: Added prominent "Explore Demo with Sample Data" button for instantaneous 1-tap review.
 
-### Phase 2: Settings & Categories (`More`)
-*(Awaiting Phase 2 execution)*
+#### 2. Registration Screen
+- **Route**: `/register`
+- **Reference Spec**: Name, email, password confirm, currency selection
+- **Live Screenshot**: `progress/screenshots/phase1-register.png`
+- **Verdict**: **Better**
+- **Visual Comparison Notes**:
+  - *Layout & Spacing*: Clean vertical form layout with compact input spacing.
+  - *Component Fidelity*: Uses shadcn `Select` with full currency options (INR, USD, EUR, GBP, JPY, AUD, CAD, SGD, AED).
 
----
-
-### Phase 3: Accounts & Net Worth (`Accounts`)
-*(Awaiting Phase 3 execution)*
-
----
-
-### Phase 4: Transaction Forms & Numpad (`Expense`, `Income`, `Transfer`)
-*(Awaiting Phase 4 execution)*
-
----
-
-### Phase 5: Transactions Feeds (`Trans.`)
-*(Awaiting Phase 5 execution)*
-
----
-
-### Phase 6: Search, Filters, Bookmarks & Recurring
-*(Awaiting Phase 6 execution)*
-
----
-
-### Phase 7: Analytics & Visual Intelligence (`Stats`)
-*(Awaiting Phase 7 execution)*
-
----
-
-### Phase 8: Mobile Bridge, Backup & Final Verification
-*(Awaiting Phase 8 execution)*
+#### 3. Settings Hub Preview
+- **Route**: `/more`
+- **Reference Image**: `docs/screens/more_01_settings_menu.jpg`
+- **Live Screenshot**: `progress/screenshots/more_01_settings_menu.png`
+- **Verdict**: **Same**
+- **Visual Comparison Notes**:
+  - *Layout & Spacing*: 3x3 grid matching reference tile positions (Configuration, Accounts, Passcode, CalcBox, PC Manager, Backup, Feedback, Help, Recommend).
+  - *Component Fidelity*: Soft pastel icon badges and Quick Theme Switcher card.

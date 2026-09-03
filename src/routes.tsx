@@ -8,6 +8,12 @@ import { AppShell } from './components/layout/AppShell';
 import { TransPage } from './features/transactions/TransPage';
 import { StatsPage } from './features/stats/StatsPage';
 import { AccountsPage } from './features/accounts/AccountsPage';
+import { ModifyOrdersPage } from './features/accounts/ModifyOrdersPage';
+import { ShowHideSettingsPage } from './features/accounts/ShowHideSettingsPage';
+import { AccountLedgerPage } from './features/accounts/AccountLedgerPage';
+import { AccountInfoPage } from './features/accounts/AccountInfoPage';
+import { AccountStatsPage } from './features/accounts/AccountStatsPage';
+import { TotalStatsPage } from './features/accounts/TotalStatsPage';
 import { MorePage } from './features/settings/MorePage';
 import { ConfigurationHubPage } from './features/settings/ConfigurationHubPage';
 import { GeneralSettingsPage } from './features/settings/GeneralSettingsPage';
@@ -59,9 +65,40 @@ export const router = createBrowserRouter([
         path: 'stats/*',
         element: <StatsPage />,
       },
+
+      // Module 3: Accounts, Assets & Net Worth Routes
       {
-        path: 'accounts/*',
-        element: <AccountsPage />,
+        path: 'accounts',
+        children: [
+          {
+            index: true,
+            element: <AccountsPage />,
+          },
+          {
+            path: 'reorder',
+            element: <ModifyOrdersPage />,
+          },
+          {
+            path: 'visibility',
+            element: <ShowHideSettingsPage />,
+          },
+          {
+            path: 'stats',
+            element: <TotalStatsPage />,
+          },
+          {
+            path: ':id',
+            element: <AccountLedgerPage />,
+          },
+          {
+            path: ':id/info',
+            element: <AccountInfoPage />,
+          },
+          {
+            path: ':id/stats',
+            element: <AccountStatsPage />,
+          },
+        ],
       },
 
       // Module 4: Settings & More Subsystem Routes

@@ -1,0 +1,97 @@
+- generic [ref=f21e2]:
+  - generic [ref=f21e12]:
+    - main [ref=f21e13]:
+      - generic [ref=f21e14]:
+        - generic [ref=f21e15]:
+          - generic [ref=f21e16]:
+            - button [ref=f21e17] [cursor=pointer]
+            - generic [ref=f21e18]:
+              - heading "Modify Orders" [level=1] [ref=f21e19]
+              - paragraph [ref=f21e20]: Select an account and use arrows to reorder
+          - generic [ref=f21e21]:
+            - button "Move Up" [ref=f21e22] [cursor=pointer]
+            - button "Move Down" [ref=f21e23] [cursor=pointer]
+        - generic [ref=f21e24]:
+          - generic [ref=f21e25] [cursor=pointer]:
+            - generic [ref=f21e26]:
+              - generic [ref=f21e27]: "1"
+              - generic [ref=f21e28]: 💵
+              - generic [ref=f21e30]:
+                - generic [ref=f21e31]: Cash
+                - generic [ref=f21e32]: Cash
+            - generic [ref=f21e33]: ₹ 32,100.00
+          - generic [ref=f21e35] [cursor=pointer]:
+            - generic [ref=f21e36]:
+              - generic [ref=f21e37]: "2"
+              - generic [ref=f21e38]: 🏦
+              - generic [ref=f21e40]:
+                - generic [ref=f21e41]: AXIS Salary Ac
+                - generic [ref=f21e42]: Accounts
+            - generic [ref=f21e43]: ₹ 5,00,430.00
+          - generic [ref=f21e45] [cursor=pointer]:
+            - generic [ref=f21e46]:
+              - generic [ref=f21e47]: "3"
+              - generic [ref=f21e48]: 🐖
+              - generic [ref=f21e50]:
+                - generic [ref=f21e51]: SBI Savings
+                - generic [ref=f21e52]: Savings
+            - generic [ref=f21e53]: ₹ 5,03,500.00
+          - generic [ref=f21e55] [cursor=pointer]:
+            - generic [ref=f21e56]:
+              - generic [ref=f21e57]: "4"
+              - generic [ref=f21e58]: 💳
+              - generic [ref=f21e60]:
+                - generic [ref=f21e61]: HSBC CC
+                - generic [ref=f21e62]: Card
+            - generic [ref=f21e63]: ₹ 39,500.00
+          - generic [ref=f21e65] [cursor=pointer]:
+            - generic [ref=f21e66]:
+              - generic [ref=f21e67]: "5"
+              - generic [ref=f21e68]: 🏧
+              - generic [ref=f21e70]:
+                - generic [ref=f21e71]: AXIS DC
+                - generic [ref=f21e72]: Debit Card
+            - generic [ref=f21e73]: ₹ 0.00
+          - generic [ref=f21e75] [cursor=pointer]:
+            - generic [ref=f21e76]:
+              - generic [ref=f21e77]: "6"
+              - generic [ref=f21e78]: 📈
+              - generic [ref=f21e80]:
+                - generic [ref=f21e81]: Mutual Fund Portfolio
+                - generic [ref=f21e82]: Investments
+            - generic [ref=f21e83]: ₹ 8,20,000.00
+          - generic [ref=f21e85] [cursor=pointer]:
+            - generic [ref=f21e86]:
+              - generic [ref=f21e87]: "7"
+              - generic [ref=f21e88]: 🏷️
+              - generic [ref=f21e90]:
+                - generic [ref=f21e91]: Car Loan
+                - generic [ref=f21e92]: Loan
+            - generic [ref=f21e93]: ₹ -3,50,000.00
+          - generic [ref=f21e98] [cursor=pointer]:
+            - generic [ref=f21e99]:
+              - generic [ref=f21e100]: "8"
+              - generic [ref=f21e101]: 🛡️
+              - generic [ref=f21e103]:
+                - generic [ref=f21e104]: Mediclaim Policy
+                - generic [ref=f21e105]: Insurance
+            - generic [ref=f21e106]: ₹ 0.00
+          - generic [ref=f21e108] [cursor=pointer]:
+            - generic [ref=f21e109]:
+              - generic [ref=f21e110]: "9"
+              - generic [ref=f21e111]: 💳
+              - generic [ref=f21e113]:
+                - generic [ref=f21e114]: AMEX Gold CC
+                - generic [ref=f21e115]: Card
+            - generic [ref=f21e116]: ₹ 30,000.00
+    - navigation "Main Navigation" [ref=f21e118]:
+      - generic [ref=f21e119]:
+        - link "Trans." [ref=f21e120] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f21e125] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f21e131] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f21e136] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T"

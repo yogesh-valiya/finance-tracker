@@ -1,0 +1,153 @@
+- generic [ref=f23e2]:
+  - generic [ref=f23e12]:
+    - main [ref=f23e13]:
+      - generic [ref=f23e14]:
+        - generic [ref=f23e15]:
+          - generic [ref=f23e16]:
+            - heading "Accounts" [level=1] [ref=f23e17]
+            - paragraph [ref=f23e18]: Assets, Liabilities & Net Worth
+          - generic [ref=f23e19]:
+            - button "Account Statistics & Trends" [ref=f23e20] [cursor=pointer]
+            - button "Add" [ref=f23e21] [cursor=pointer]
+            - button "Options Menu" [ref=f23e22] [cursor=pointer]
+        - generic [ref=f23e24]:
+          - generic [ref=f23e25]:
+            - generic [ref=f23e26]:
+              - generic [ref=f23e27]: Assets
+              - generic [ref=f23e28]: ₹ 18,56,030.00
+            - generic [ref=f23e29]:
+              - generic [ref=f23e30]: Liabilities
+              - generic [ref=f23e31]: ₹ 4,19,500.00
+          - generic [ref=f23e32]:
+            - generic [ref=f23e33]: Total Net Worth
+            - generic [ref=f23e34]: ₹ 14,36,530.00
+        - generic [ref=f23e35]:
+          - generic [ref=f23e36]:
+            - generic [ref=f23e37] [cursor=pointer]:
+              - generic [ref=f23e38]:
+                - generic [ref=f23e39]: 💵
+                - generic [ref=f23e40]: Cash
+                - generic [ref=f23e41]: "1"
+              - generic [ref=f23e42]: ₹ 32,100.00
+            - generic [ref=f23e47] [cursor=pointer]:
+              - generic [ref=f23e48]:
+                - generic [ref=f23e49]: 💵
+                - generic [ref=f23e51]:
+                  - generic [ref=f23e52]: Cash
+                  - generic [ref=f23e54]: Physical cash and wallet
+              - generic [ref=f23e55]:
+                - generic [ref=f23e56]: ₹ 32,100.00
+                - button "Account Settings" [ref=f23e58]
+          - generic [ref=f23e59]:
+            - generic [ref=f23e60] [cursor=pointer]:
+              - generic [ref=f23e61]:
+                - generic [ref=f23e62]: 🏦
+                - generic [ref=f23e63]: Accounts
+                - generic [ref=f23e64]: "1"
+              - generic [ref=f23e65]: ₹ 5,00,430.00
+            - generic [ref=f23e70] [cursor=pointer]:
+              - generic [ref=f23e71]:
+                - generic [ref=f23e72]: 🏦
+                - generic [ref=f23e74]:
+                  - generic [ref=f23e75]: AXIS Salary Ac
+                  - generic [ref=f23e77]: Primary salary checking account
+              - generic [ref=f23e78]:
+                - generic [ref=f23e79]: ₹ 5,00,430.00
+                - button "Account Settings" [ref=f23e81]
+          - generic [ref=f23e83] [cursor=pointer]:
+            - generic [ref=f23e84]:
+              - generic [ref=f23e85]: 💳
+              - generic [ref=f23e86]: Card
+              - generic [ref=f23e87]: "2"
+            - generic [ref=f23e88]: ₹ 69,500.00
+          - generic [ref=f23e92]:
+            - generic [ref=f23e93] [cursor=pointer]:
+              - generic [ref=f23e94]:
+                - generic [ref=f23e95]: 🏧
+                - generic [ref=f23e96]: Debit Card
+                - generic [ref=f23e97]: "1"
+              - generic [ref=f23e98]: ₹ 0.00
+            - generic [ref=f23e103] [cursor=pointer]:
+              - generic [ref=f23e104]:
+                - generic [ref=f23e105]: 🏧
+                - generic [ref=f23e107]:
+                  - generic [ref=f23e108]: AXIS DC
+                  - generic [ref=f23e110]: Debit card linked to Axis salary
+              - generic [ref=f23e111]:
+                - generic [ref=f23e112]: ₹ 0.00
+                - button "Account Settings" [ref=f23e114]
+          - generic [ref=f23e115]:
+            - generic [ref=f23e116] [cursor=pointer]:
+              - generic [ref=f23e117]:
+                - generic [ref=f23e118]: 🐖
+                - generic [ref=f23e119]: Savings
+                - generic [ref=f23e120]: "1"
+              - generic [ref=f23e121]: ₹ 5,03,500.00
+            - generic [ref=f23e126] [cursor=pointer]:
+              - generic [ref=f23e127]:
+                - generic [ref=f23e128]: 🐖
+                - generic [ref=f23e130]:
+                  - generic [ref=f23e131]: SBI Savings
+                  - generic [ref=f23e133]: High-yield emergency fund
+              - generic [ref=f23e134]:
+                - generic [ref=f23e135]: ₹ 5,03,500.00
+                - button "Account Settings" [ref=f23e137]
+          - generic [ref=f23e138]:
+            - generic [ref=f23e139] [cursor=pointer]:
+              - generic [ref=f23e140]:
+                - generic [ref=f23e141]: 📈
+                - generic [ref=f23e142]: Investments
+                - generic [ref=f23e143]: "1"
+              - generic [ref=f23e144]: ₹ 8,20,000.00
+            - generic [ref=f23e149] [cursor=pointer]:
+              - generic [ref=f23e150]:
+                - generic [ref=f23e151]: 📈
+                - generic [ref=f23e153]:
+                  - generic [ref=f23e154]: Mutual Fund Portfolio
+                  - generic [ref=f23e156]: Equity mutual funds & ETFs
+              - generic [ref=f23e157]:
+                - generic [ref=f23e158]: ₹ 8,20,000.00
+                - button "Account Settings" [ref=f23e160]
+          - generic [ref=f23e161]:
+            - generic [ref=f23e162] [cursor=pointer]:
+              - generic [ref=f23e163]:
+                - generic [ref=f23e164]: 🏷️
+                - generic [ref=f23e165]: Loan
+                - generic [ref=f23e166]: "1"
+              - generic [ref=f23e167]: ₹ -3,50,000.00
+            - generic [ref=f23e172] [cursor=pointer]:
+              - generic [ref=f23e173]:
+                - generic [ref=f23e174]: 🏷️
+                - generic [ref=f23e176]:
+                  - generic [ref=f23e177]: Car Loan
+                  - generic [ref=f23e179]: Auto vehicle finance loan liability
+              - generic [ref=f23e180]:
+                - generic [ref=f23e181]: ₹ -3,50,000.00
+                - button "Account Settings" [ref=f23e183]
+          - generic [ref=f23e184]:
+            - generic [ref=f23e185] [cursor=pointer]:
+              - generic [ref=f23e186]:
+                - generic [ref=f23e187]: 🛡️
+                - generic [ref=f23e188]: Insurance
+                - generic [ref=f23e189]: "1"
+              - generic [ref=f23e190]: ₹ 0.00
+            - generic [ref=f23e195] [cursor=pointer]:
+              - generic [ref=f23e196]:
+                - generic [ref=f23e197]: 🛡️
+                - generic [ref=f23e199]:
+                  - generic [ref=f23e200]: Mediclaim Policy
+                  - generic [ref=f23e202]: Family health mediclaim policy
+              - generic [ref=f23e203]:
+                - generic [ref=f23e204]: ₹ 0.00
+                - button "Account Settings" [ref=f23e206]
+    - navigation "Main Navigation" [ref=f23e207]:
+      - generic [ref=f23e208]:
+        - link "Trans." [ref=f23e209] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f23e214] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f23e220] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f23e225] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T"

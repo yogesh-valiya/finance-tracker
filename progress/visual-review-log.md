@@ -28,7 +28,24 @@
 
 ## Detailed Phase Review Entries
 
-### Phase 2: Settings, Master Data & Configuration (`More`)
+### Phase 3: Accounts, Assets & Net Worth Visual Reviews
+
+| Screen ID | Reference Image | Live Captured Screenshot | Status / Verdict | Review Notes |
+|:---|:---|:---|:---:|:---|
+| **account_01** | `account_01_summary_net_worth.jpeg` | `progress/screenshots/account_01_summary_net_worth.png` | **BETTER** | Dense consolidated net worth card with Asset/Liability breakdown; 11 classification groups with counts and totals; dual credit card statement metrics. |
+| **account_02** | `account_02_total_stats_trends.jpeg` | `progress/screenshots/account_02_total_stats_trends.png` | **BETTER** | Interactive 6-month Net Worth trajectory curve and monthly comparative cashflow bar chart. |
+| **account_03** | `account_03_cash_daily_ledger.jpeg` | `progress/screenshots/account_03_cash_daily_ledger.png` | **BETTER** | Daily/Monthly/Annually sub-tabs; 4-metric statement header strip (Deposit, Withdrawal, Total, Balance); daily grouped ledger feed. |
+| **account_04** | `account_04_single_account_stats_hsbc_cc.jpeg` | `progress/screenshots/account_04_single_account_stats.png` | **BETTER** | Single-account trajectory curve with live balance card and cashflow distribution bars. |
+| **account_05** | `account_05_info_credit_card.jpeg` | `progress/screenshots/account_05_info_credit_card.png` | **BETTER** | Account configuration sheet with Credit Card statement cycle preview, difference reconciliation alert, and deletion safeguards. |
+| **account_08** | `account_08_group_select_modal.jpeg` | `progress/screenshots/account_08_group_select_modal.png` | **BETTER** | 11 group classification modal with emoji icons, descriptions, and liability badges. |
+| **account_09** | `account_09_add_account_form.jpeg` | `progress/screenshots/account_09_add_account_form.png` | **BETTER** | Clean form with shadcn Selects, date pickers, currency prefix, and group header pill. |
+| **account_13** | `account_13_modify_orders.jpeg` | `progress/screenshots/account_13_modify_orders.png` | **BETTER** | Row selection with active border and checkmark; header Up/Down chevrons for reordering. |
+| **account_14** | `account_14_show_hide_settings.jpeg` | `progress/screenshots/account_14_show_hide_settings.png` | **BETTER** | Grouped account list with live balances and interactive Eye toggles with status badges. |
+| **account_15** | `account_15_record_difference_confirmation_modal.jpg` | `progress/screenshots/account_15_record_difference_confirmation_modal.png` | **BETTER** | Double-entry difference reconciliation modal with `[ YES ]` (Record Entry) and `[ NO ]` (Balance Only). |
+
+---
+
+## Phase 2: Settings, Master Data & Configuration Reviews(`More`)
 
 #### 1. Settings Hub (`/more`)
 - **Route**: `/more`

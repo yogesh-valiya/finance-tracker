@@ -1,0 +1,287 @@
+- generic:
+  - generic:
+    - generic [aria-hidden]:
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]: Accounts
+                - paragraph: Assets, Liabilities & Net Worth
+              - generic:
+                - button
+                - button: Add
+                - button
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Assets
+                    - generic: ₹ 18,56,030.00
+                  - generic:
+                    - generic: Liabilities
+                    - generic: ₹ 3,89,500.00
+                - generic:
+                  - generic: Total Net Worth
+                  - generic: ₹ 14,66,530.00
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💵
+                    - generic: Cash
+                    - generic: "1"
+                  - generic: ₹ 32,100.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💵
+                      - generic:
+                        - generic: Cash
+                        - generic: Physical cash and wallet
+                    - generic:
+                      - generic: ₹ 32,100.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏦
+                    - generic: Accounts
+                    - generic: "1"
+                  - generic: ₹ 5,00,430.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏦
+                      - generic:
+                        - generic: AXIS Salary Ac
+                        - generic: Primary salary checking account
+                    - generic:
+                      - generic: ₹ 5,00,430.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💳
+                    - generic: Card
+                    - generic: "1"
+                  - generic: ₹ 39,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💳
+                      - generic:
+                        - generic: HSBC CC
+                        - generic:
+                          - generic:
+                            - text: "Billed:"
+                            - strong: ₹ 20,950.00
+                          - generic: •
+                          - generic: "Pay: 05/10"
+                    - generic:
+                      - generic:
+                        - generic: ₹ 39,500.00
+                        - generic: "Outst: ₹ 39,500.00"
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏧
+                    - generic: Debit Card
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏧
+                      - generic:
+                        - generic: AXIS DC
+                        - generic: Debit card linked to Axis salary
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🐖
+                    - generic: Savings
+                    - generic: "1"
+                  - generic: ₹ 5,03,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🐖
+                      - generic:
+                        - generic: SBI Savings
+                        - generic: High-yield emergency fund
+                    - generic:
+                      - generic: ₹ 5,03,500.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 📈
+                    - generic: Investments
+                    - generic: "1"
+                  - generic: ₹ 8,20,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 📈
+                      - generic:
+                        - generic: Mutual Fund Portfolio
+                        - generic: Equity mutual funds & ETFs
+                    - generic:
+                      - generic: ₹ 8,20,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏷️
+                    - generic: Loan
+                    - generic: "1"
+                  - generic: ₹ -3,50,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏷️
+                      - generic:
+                        - generic: Car Loan
+                        - generic: Auto vehicle finance loan liability
+                    - generic:
+                      - generic: ₹ -3,50,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🛡️
+                    - generic: Insurance
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🛡️
+                      - generic:
+                        - generic: Mediclaim Policy
+                        - generic: Family health mediclaim policy
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+        - navigation:
+          - generic:
+            - link:
+              - /url: /trans
+              - generic: Trans.
+            - link:
+              - /url: /stats
+              - generic: Stats
+            - link:
+              - /url: /accounts
+              - generic: Accounts
+            - link:
+              - /url: /more
+              - generic: More
+    - region "Notifications alt+T"
+  - dialog [ref=f20e103]:
+    - generic [ref=f20e14]:
+      - button [ref=f20e104] [cursor=pointer]
+      - heading "New Card" [level=2] [ref=f20e105]
+    - generic [ref=f20e106]:
+      - generic [ref=f20e107]:
+        - generic [ref=f20e108]:
+          - generic [ref=f20e109]: 💳
+          - generic [ref=f20e110]: Card
+        - button "Change Group" [ref=f20e111] [cursor=pointer]
+      - generic [ref=f20e112]:
+        - generic [ref=f20e113]: Account Name
+        - textbox "Account Name" [active] [ref=f20e114]:
+          - /placeholder: e.g. AXIS Salary Ac, HSBC CC, Wallet
+      - generic [ref=f20e115]:
+        - generic [ref=f20e116]: Initial Balance
+        - generic [ref=f20e118]:
+          - generic [ref=f20e119]: ₹
+          - spinbutton "Initial Balance" [ref=f20e120]: "0"
+      - generic [ref=f20e121]:
+        - generic [ref=f20e122]:
+          - generic [ref=f20e123]: Settlement Date
+          - combobox [ref=f20e124]:
+            - option "Every 1th" [selected]
+            - option "Every 2th"
+            - option "Every 3th"
+            - option "Every 4th"
+            - option "Every 5th"
+            - option "Every 6th"
+            - option "Every 7th"
+            - option "Every 8th"
+            - option "Every 9th"
+            - option "Every 10th"
+            - option "Every 11th"
+            - option "Every 12th"
+            - option "Every 13th"
+            - option "Every 14th"
+            - option "Every 15th"
+            - option "Every 16th"
+            - option "Every 17th"
+            - option "Every 18th"
+            - option "Every 19th"
+            - option "Every 20th"
+            - option "Every 21th"
+            - option "Every 22th"
+            - option "Every 23th"
+            - option "Every 24th"
+            - option "Every 25th"
+            - option "Every 26th"
+            - option "Every 27th"
+            - option "Every 28th"
+            - option "Every 29th"
+            - option "Every 30th"
+            - option "Every 31th"
+        - generic [ref=f20e125]:
+          - generic [ref=f20e126]: Payment Date
+          - combobox [ref=f20e127]:
+            - option "Every 1th" [selected]
+            - option "Every 2th"
+            - option "Every 3th"
+            - option "Every 4th"
+            - option "Every 5th"
+            - option "Every 6th"
+            - option "Every 7th"
+            - option "Every 8th"
+            - option "Every 9th"
+            - option "Every 10th"
+            - option "Every 11th"
+            - option "Every 12th"
+            - option "Every 13th"
+            - option "Every 14th"
+            - option "Every 15th"
+            - option "Every 16th"
+            - option "Every 17th"
+            - option "Every 18th"
+            - option "Every 19th"
+            - option "Every 20th"
+            - option "Every 21th"
+            - option "Every 22th"
+            - option "Every 23th"
+            - option "Every 24th"
+            - option "Every 25th"
+            - option "Every 26th"
+            - option "Every 27th"
+            - option "Every 28th"
+            - option "Every 29th"
+            - option "Every 30th"
+            - option "Every 31th"
+      - generic [ref=f20e128]:
+        - generic [ref=f20e129]: Description / Account No. (Optional)
+        - textbox "Description / Account No. (Optional)" [ref=f20e130]:
+          - /placeholder: e.g. A/C No. ending in 4920
+      - generic [ref=f20e131]:
+        - generic [ref=f20e132]:
+          - generic [ref=f20e133]: Include in Totals
+          - generic [ref=f20e134]: Include in Consolidated Net Worth calculation
+        - switch [checked] [ref=f20e135] [cursor=pointer]
+        - checkbox [checked] [aria-hidden]
+      - generic [ref=f20e136]:
+        - button "Cancel" [ref=f20e137] [cursor=pointer]
+        - button "Save Account" [ref=f20e138] [cursor=pointer]
+    - button "Close" [ref=f20e98] [cursor=pointer]

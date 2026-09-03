@@ -1,0 +1,145 @@
+[     320ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:21550
+[     381ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4416
+[    1047ms] [ERROR] Warning: React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%s AccountLedgerPage 1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useRef                     useRef
+6. useContext                 useContext
+7. useLayoutEffect            useLayoutEffect
+8. useCallback                useCallback
+9. useRef                     useRef
+10. useMemo                   useMemo
+11. useSyncExternalStore      useSyncExternalStore
+12. useEffect                 useEffect
+13. useDebugValue             useDebugValue
+14. useDebugValue             useDebugValue
+15. useRef                    useRef
+16. useMemo                   useMemo
+17. useSyncExternalStore      useSyncExternalStore
+18. useEffect                 useEffect
+19. useDebugValue             useDebugValue
+20. useDebugValue             useDebugValue
+21. useState                  useState
+22. useState                  useState
+23. useEffect                 useEffect
+24. useMemo                   useMemo
+25. undefined                 useMemo
+ 
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:39:18)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at Outlet (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4518:26)
+    at main
+    at div
+    at div
+    at AppShell
+    at ProtectedRoute (http://localhost:5173/src/features/auth/ProtectedRoute.tsx?t=1788422132944:24:34)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at RenderErrorBoundary (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4072:5)
+    at DataRoutes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:5255:5)
+    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4525:15)
+    at RouterProvider (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:5069:5)
+    at App (http://localhost:5173/src/App.tsx?t=1788423908799:25:24) @ http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:520
+[    1051ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:3699:24)
+[    1051ms] [ERROR] Error handled by React Router default ErrorBoundary: Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at beginWork$1 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19753:22)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19198:20) @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4053
+[    1052ms] [ERROR] Error handled by React Router default ErrorBoundary: Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at beginWork$1 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19753:22)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19198:20) @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4053
+[    1056ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:3674:22)
+    at Object.invokeGuardedCallbackDev (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:3699:24)
+[    1056ms] [ERROR] Error handled by React Router default ErrorBoundary: Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at beginWork$1 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19753:22)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19198:20) @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4053
+[    1056ms] [ERROR] Error handled by React Router default ErrorBoundary: Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at beginWork$1 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19753:22)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19198:20) @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4053
+[    1058ms] [ERROR] The above error occurred in the <AccountLedgerPage> component:
+
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:39:18)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at Outlet (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4518:26)
+    at main
+    at div
+    at div
+    at AppShell
+    at ProtectedRoute (http://localhost:5173/src/features/auth/ProtectedRoute.tsx?t=1788422132944:24:34)
+    at RenderedRoute (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4112:5)
+    at RenderErrorBoundary (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4072:5)
+    at DataRoutes (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:5255:5)
+    at Router (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4525:15)
+    at RouterProvider (http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:5069:5)
+    at App (http://localhost:5173/src/App.tsx?t=1788423908799:25:24)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RenderErrorBoundary. @ http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14031
+[    1058ms] [ERROR] React Router caught the following error during render Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11678:21)
+    at updateMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12199:22)
+    at Object.useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:12726:24)
+    at useMemo (http://localhost:5173/node_modules/.vite/deps/chunk-QI6TWUTQ.js?v=8eeb8247:1094:29)
+    at AccountLedgerPage (http://localhost:5173/src/features/accounts/AccountLedgerPage.tsx?t=1788423908799:109:24)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:11548:26)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:14582:28)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:15924:22)
+    at beginWork$1 (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19753:22)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/chunk-2MWANQQC.js?v=8eeb8247:19198:20) {componentStack: 
+    at AccountLedgerPage (http://localhost:5173/s…localhost:5173/src/App.tsx?t=1788423908799:25:24)} @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8eeb8247:4098

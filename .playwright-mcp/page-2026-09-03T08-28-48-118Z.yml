@@ -1,0 +1,240 @@
+- generic:
+  - generic:
+    - generic [aria-hidden]:
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]: Accounts
+                - paragraph: Assets, Liabilities & Net Worth
+              - generic:
+                - button
+                - button: Add
+                - button
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Assets
+                    - generic: ₹ 18,56,030.00
+                  - generic:
+                    - generic: Liabilities
+                    - generic: ₹ 3,89,500.00
+                - generic:
+                  - generic: Total Net Worth
+                  - generic: ₹ 14,66,530.00
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💵
+                    - generic: Cash
+                    - generic: "1"
+                  - generic: ₹ 32,100.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💵
+                      - generic:
+                        - generic: Cash
+                        - generic: Physical cash and wallet
+                    - generic:
+                      - generic: ₹ 32,100.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏦
+                    - generic: Accounts
+                    - generic: "1"
+                  - generic: ₹ 5,00,430.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏦
+                      - generic:
+                        - generic: AXIS Salary Ac
+                        - generic: Primary salary checking account
+                    - generic:
+                      - generic: ₹ 5,00,430.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💳
+                    - generic: Card
+                    - generic: "1"
+                  - generic: ₹ 39,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💳
+                      - generic:
+                        - generic: HSBC CC
+                        - generic:
+                          - generic:
+                            - text: "Billed:"
+                            - strong: ₹ 20,950.00
+                          - generic: •
+                          - generic: "Pay: 05/10"
+                    - generic:
+                      - generic:
+                        - generic: ₹ 39,500.00
+                        - generic: "Outst: ₹ 39,500.00"
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏧
+                    - generic: Debit Card
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏧
+                      - generic:
+                        - generic: AXIS DC
+                        - generic: Debit card linked to Axis salary
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🐖
+                    - generic: Savings
+                    - generic: "1"
+                  - generic: ₹ 5,03,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🐖
+                      - generic:
+                        - generic: SBI Savings
+                        - generic: High-yield emergency fund
+                    - generic:
+                      - generic: ₹ 5,03,500.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 📈
+                    - generic: Investments
+                    - generic: "1"
+                  - generic: ₹ 8,20,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 📈
+                      - generic:
+                        - generic: Mutual Fund Portfolio
+                        - generic: Equity mutual funds & ETFs
+                    - generic:
+                      - generic: ₹ 8,20,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏷️
+                    - generic: Loan
+                    - generic: "1"
+                  - generic: ₹ -3,50,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏷️
+                      - generic:
+                        - generic: Car Loan
+                        - generic: Auto vehicle finance loan liability
+                    - generic:
+                      - generic: ₹ -3,50,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🛡️
+                    - generic: Insurance
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🛡️
+                      - generic:
+                        - generic: Mediclaim Policy
+                        - generic: Family health mediclaim policy
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+        - navigation:
+          - generic:
+            - link:
+              - /url: /trans
+              - generic: Trans.
+            - link:
+              - /url: /stats
+              - generic: Stats
+            - link:
+              - /url: /accounts
+              - generic: Accounts
+            - link:
+              - /url: /more
+              - generic: More
+    - region "Notifications alt+T"
+  - dialog [aria-hidden]:
+    - generic:
+      - generic:
+        - button
+        - heading [level=2]: New Card
+    - generic:
+      - generic:
+        - generic:
+          - generic: 💳
+          - generic: Card
+        - button: Change Group
+      - generic:
+        - generic: Account Name
+        - textbox:
+          - /placeholder: e.g. AXIS Salary Ac, HSBC CC, Wallet
+          - text: AMEX Gold CC
+      - generic:
+        - generic: Initial Balance
+        - generic:
+          - generic: ₹
+          - spinbutton: "15000"
+      - generic:
+        - generic:
+          - generic: Settlement Date
+          - combobox
+        - generic:
+          - generic: Payment Date
+          - combobox
+      - generic:
+        - generic: Description / Account No. (Optional)
+        - textbox:
+          - /placeholder: e.g. A/C No. ending in 4920
+      - generic:
+        - generic:
+          - generic: Include in Totals
+          - generic: Include in Consolidated Net Worth calculation
+        - switch [checked]
+        - checkbox [checked] [aria-hidden]
+      - generic:
+        - button: Cancel
+        - button [active]: Save Account
+    - button:
+      - generic: Close
+  - alertdialog [ref=f20e140]:
+    - generic [ref=f20e141]:
+      - heading "Record Initial Difference?" [level=2] [ref=f20e145]
+      - paragraph [ref=f20e146]:
+        - text: The opening balance of
+        - strong [ref=f20e147]: ₹ 15000
+        - text: is registered on your account details. Would you like to record this difference as an
+        - strong [ref=f20e148]: Income
+        - text: transaction for ledger double-entry parity?
+    - generic [ref=f20e149]:
+      - button "[ NO ] (Balance Only)" [ref=f20e150] [cursor=pointer]
+      - button "[ YES ] (Record Entry)" [ref=f20e151] [cursor=pointer]

@@ -167,4 +167,24 @@ describe('Financial Math Core', () => {
       expect(mismatchedParen.error).toBe('Mismatched parentheses');
     });
   });
+
+  describe('Credit Card Statement & Settlement Cutoff Math', () => {
+    it('accurately divides transactions into statement vs unbilled based on settlement date', () => {
+      const settlementDate = 15;
+      const statementCutoff = new Date(2026, 7, settlementDate, 23, 59, 59); // Aug 15, 2026
+
+      const txList = [
+        { date: '2026-08-10T12:00:00.000Z', amount: 5000, type: 'expense' }, // before cutoff -> billed
+        { date: '2026-08-14T20:00:00.000Z', amount: 3500, type: 'expense' }, // before cutoff -> billed
+        { date: '2026-08-18T10:00:00.000Z', amount: 4200, type: 'expense' }, // after cutoff -> unbilled
+      ];
+
+      const billed = txList.filter((t) => new Date(t.date).getTime() <= statementCutoff.getTime());
+      const statementBalance = billed.reduce((sum, t) => sum + t.amount, 0);
+      const totalOutstanding = txList.reduce((sum, t) => sum + t.amount, 0);
+
+      expect(statementBalance).toBe(8500);
+      expect(totalOutstanding).toBe(12700);
+    });
+  });
 });

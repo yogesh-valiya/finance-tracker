@@ -1,0 +1,262 @@
+- generic:
+  - generic:
+    - generic [aria-hidden]:
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]: Accounts
+                - paragraph: Assets, Liabilities & Net Worth
+              - generic:
+                - button
+                - button: Add
+                - button
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Assets
+                    - generic: ₹ 18,56,030.00
+                  - generic:
+                    - generic: Liabilities
+                    - generic: ₹ 3,89,500.00
+                - generic:
+                  - generic: Total Net Worth
+                  - generic: ₹ 14,66,530.00
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💵
+                    - generic: Cash
+                    - generic: "1"
+                  - generic: ₹ 32,100.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💵
+                      - generic:
+                        - generic: Cash
+                        - generic: Physical cash and wallet
+                    - generic:
+                      - generic: ₹ 32,100.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏦
+                    - generic: Accounts
+                    - generic: "1"
+                  - generic: ₹ 5,00,430.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏦
+                      - generic:
+                        - generic: AXIS Salary Ac
+                        - generic: Primary salary checking account
+                    - generic:
+                      - generic: ₹ 5,00,430.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 💳
+                    - generic: Card
+                    - generic: "1"
+                  - generic: ₹ 39,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 💳
+                      - generic:
+                        - generic: HSBC CC
+                        - generic:
+                          - generic:
+                            - text: "Billed:"
+                            - strong: ₹ 20,950.00
+                          - generic: •
+                          - generic: "Pay: 05/10"
+                    - generic:
+                      - generic:
+                        - generic: ₹ 39,500.00
+                        - generic: "Outst: ₹ 39,500.00"
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏧
+                    - generic: Debit Card
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏧
+                      - generic:
+                        - generic: AXIS DC
+                        - generic: Debit card linked to Axis salary
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🐖
+                    - generic: Savings
+                    - generic: "1"
+                  - generic: ₹ 5,03,500.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🐖
+                      - generic:
+                        - generic: SBI Savings
+                        - generic: High-yield emergency fund
+                    - generic:
+                      - generic: ₹ 5,03,500.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 📈
+                    - generic: Investments
+                    - generic: "1"
+                  - generic: ₹ 8,20,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 📈
+                      - generic:
+                        - generic: Mutual Fund Portfolio
+                        - generic: Equity mutual funds & ETFs
+                    - generic:
+                      - generic: ₹ 8,20,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🏷️
+                    - generic: Loan
+                    - generic: "1"
+                  - generic: ₹ -3,50,000.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🏷️
+                      - generic:
+                        - generic: Car Loan
+                        - generic: Auto vehicle finance loan liability
+                    - generic:
+                      - generic: ₹ -3,50,000.00
+                      - button
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: 🛡️
+                    - generic: Insurance
+                    - generic: "1"
+                  - generic: ₹ 0.00
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 🛡️
+                      - generic:
+                        - generic: Mediclaim Policy
+                        - generic: Family health mediclaim policy
+                    - generic:
+                      - generic: ₹ 0.00
+                      - button
+        - navigation:
+          - generic:
+            - link:
+              - /url: /trans
+              - generic: Trans.
+            - link:
+              - /url: /stats
+              - generic: Stats
+            - link:
+              - /url: /accounts
+              - generic: Accounts
+            - link:
+              - /url: /more
+              - generic: More
+    - region "Notifications alt+T"
+  - dialog [ref=f20e12]:
+    - heading "Select Account Group" [level=2] [ref=f20e15]
+    - generic [ref=f20e16]:
+      - generic [ref=f20e17]: "Choose a classification group for your new account:"
+      - button "💵 Cash Wallets & physical cash" [active] [ref=f20e18] [cursor=pointer]:
+        - generic [ref=f20e19]:
+          - generic [ref=f20e20]: 💵
+          - generic [ref=f20e21]:
+            - generic [ref=f20e22]: Cash
+            - generic [ref=f20e24]: Wallets & physical cash
+      - button "🏦 Accounts Checking & salary bank accounts" [ref=f20e25] [cursor=pointer]:
+        - generic [ref=f20e26]:
+          - generic [ref=f20e27]: 🏦
+          - generic [ref=f20e28]:
+            - generic [ref=f20e29]: Accounts
+            - generic [ref=f20e31]: Checking & salary bank accounts
+      - button "💳 Card Liability Credit cards with statement billing" [ref=f20e32] [cursor=pointer]:
+        - generic [ref=f20e33]:
+          - generic [ref=f20e34]: 💳
+          - generic [ref=f20e35]:
+            - generic [ref=f20e36]:
+              - generic [ref=f20e37]: Card
+              - generic [ref=f20e38]: Liability
+            - generic [ref=f20e39]: Credit cards with statement billing
+      - button "🏧 Debit Card Direct linked bank debit cards" [ref=f20e40] [cursor=pointer]:
+        - generic [ref=f20e41]:
+          - generic [ref=f20e42]: 🏧
+          - generic [ref=f20e43]:
+            - generic [ref=f20e44]: Debit Card
+            - generic [ref=f20e46]: Direct linked bank debit cards
+      - button "🐖 Savings High-yield & emergency savings" [ref=f20e47] [cursor=pointer]:
+        - generic [ref=f20e48]:
+          - generic [ref=f20e49]: 🐖
+          - generic [ref=f20e50]:
+            - generic [ref=f20e51]: Savings
+            - generic [ref=f20e53]: High-yield & emergency savings
+      - button "🎟️ Top-Up / Prepaid Reloadable cards & transit passes" [ref=f20e54] [cursor=pointer]:
+        - generic [ref=f20e55]:
+          - generic [ref=f20e56]: 🎟️
+          - generic [ref=f20e57]:
+            - generic [ref=f20e58]: Top-Up / Prepaid
+            - generic [ref=f20e60]: Reloadable cards & transit passes
+      - button "📈 Investments Mutual funds, stocks & crypto" [ref=f20e61] [cursor=pointer]:
+        - generic [ref=f20e62]:
+          - generic [ref=f20e63]: 📈
+          - generic [ref=f20e64]:
+            - generic [ref=f20e65]: Investments
+            - generic [ref=f20e67]: Mutual funds, stocks & crypto
+      - button "📉 Overdrafts Liability Credit line facility accounts" [ref=f20e68] [cursor=pointer]:
+        - generic [ref=f20e69]:
+          - generic [ref=f20e70]: 📉
+          - generic [ref=f20e71]:
+            - generic [ref=f20e72]:
+              - generic [ref=f20e73]: Overdrafts
+              - generic [ref=f20e74]: Liability
+            - generic [ref=f20e75]: Credit line facility accounts
+      - button "🏷️ Loan Liability Car, home & personal loans (negative balance)" [ref=f20e76] [cursor=pointer]:
+        - generic [ref=f20e77]:
+          - generic [ref=f20e78]: 🏷️
+          - generic [ref=f20e79]:
+            - generic [ref=f20e80]:
+              - generic [ref=f20e81]: Loan
+              - generic [ref=f20e82]: Liability
+            - generic [ref=f20e83]: Car, home & personal loans (negative balance)
+      - button "🛡️ Insurance Life, health & property policies" [ref=f20e84] [cursor=pointer]:
+        - generic [ref=f20e85]:
+          - generic [ref=f20e86]: 🛡️
+          - generic [ref=f20e87]:
+            - generic [ref=f20e88]: Insurance
+            - generic [ref=f20e90]: Life, health & property policies
+      - button "📦 Others Miscellaneous asset & liability holdings" [ref=f20e91] [cursor=pointer]:
+        - generic [ref=f20e92]:
+          - generic [ref=f20e93]: 📦
+          - generic [ref=f20e94]:
+            - generic [ref=f20e95]: Others
+            - generic [ref=f20e97]: Miscellaneous asset & liability holdings
+    - button "Close" [ref=f20e98] [cursor=pointer]

@@ -1,0 +1,30 @@
+- generic [ref=f19e2]:
+  - generic [ref=f19e4]:
+    - generic [ref=f19e5]:
+      - heading "Money Manager" [level=1] [ref=f19e10]
+      - paragraph [ref=f19e11]: Double-entry personal bookkeeping & net worth tracker
+    - generic [ref=f19e12]:
+      - generic [ref=f19e13]:
+        - generic [ref=f19e14]: Sign In
+        - generic [ref=f19e15]: Enter your credentials to access your financial ledger.
+      - generic [ref=f19e16]:
+        - generic [ref=f19e17]:
+          - generic [ref=f19e18]:
+            - generic [ref=f19e19]: Email Address
+            - textbox "Email Address" [disabled] [ref=f19e20]:
+              - /placeholder: name@example.com
+          - generic [ref=f19e21]:
+            - generic [ref=f19e22]:
+              - generic [ref=f19e23]: Password
+              - link "Forgot Password?" [ref=f19e24] [cursor=pointer]:
+                - /url: /forgot-password
+            - textbox "Password" [disabled] [ref=f19e25]:
+              - /placeholder: ••••••••
+          - button "Signing In..." [disabled]
+          - generic [ref=f19e26]: Or Test Instantly
+          - button "Explore Demo with Sample Data" [disabled]
+        - paragraph [ref=f19e29]:
+          - text: Don't have an account?
+          - link "Create Account" [ref=f19e30] [cursor=pointer]:
+            - /url: /register
+  - region "Notifications alt+T"

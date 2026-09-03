@@ -1,0 +1,72 @@
+- generic [ref=f23e2]:
+  - generic [ref=f23e12]:
+    - main [ref=f23e13]:
+      - generic [ref=f23e229]:
+        - generic [ref=f23e230]:
+          - generic [ref=f23e231]:
+            - button [ref=f23e232] [cursor=pointer]
+            - generic [ref=f23e233]:
+              - generic [ref=f23e234]: 💵
+              - generic [ref=f23e235]:
+                - heading "Cash" [level=1] [ref=f23e236]
+                - paragraph [ref=f23e237]: Account Configuration & Settings
+          - button "Delete Account" [ref=f23e238] [cursor=pointer]
+        - generic [ref=f23e240]:
+          - generic [ref=f23e241]:
+            - generic [ref=f23e242]: Current Live Balance
+            - generic [ref=f23e243]: ₹ 32,100.00
+          - generic [ref=f23e244]: Cash
+        - generic [ref=f23e245]:
+          - generic [ref=f23e246]:
+            - generic [ref=f23e247]: Account Group
+            - combobox [ref=f23e248]:
+              - option "💵 Cash" [selected]
+              - option "🏦 Accounts"
+              - option "💳 Card (Liability)"
+              - option "🏧 Debit Card"
+              - option "🐖 Savings"
+              - option "🎟️ Top-Up / Prepaid"
+              - option "📈 Investments"
+              - option "📉 Overdrafts (Liability)"
+              - option "🏷️ Loan (Liability)"
+              - option "🛡️ Insurance"
+              - option "📦 Others"
+          - generic [ref=f23e249]:
+            - generic [ref=f23e250]: Account Name
+            - textbox "Account Name" [ref=f23e251]: Cash
+          - generic [ref=f23e252]:
+            - generic [ref=f23e253]:
+              - generic [ref=f23e254]: Base / Initial Amount
+              - generic [ref=f23e255]: Changing this prompts difference reconciliation
+            - generic [ref=f23e256]:
+              - generic [ref=f23e257]: ₹
+              - spinbutton "Base / Initial Amount Changing this prompts difference reconciliation" [ref=f23e258]: "25000"
+          - generic [ref=f23e259]:
+            - generic [ref=f23e260]: Description / Notes
+            - textbox "Description / Notes" [ref=f23e261]:
+              - /placeholder: Account details, branch, notes
+              - text: Physical cash and wallet
+          - generic [ref=f23e262]:
+            - generic [ref=f23e263]:
+              - generic [ref=f23e264]: Include in Totals
+              - generic [ref=f23e265]: Include in Consolidated Net Worth calculation
+            - switch [checked] [ref=f23e266] [cursor=pointer]
+            - checkbox [checked] [aria-hidden]
+          - generic [ref=f23e267]:
+            - generic [ref=f23e268]:
+              - generic [ref=f23e269]: Hide Account
+              - generic [ref=f23e270]: Hide from transaction selection sheets and feeds
+            - switch [ref=f23e271] [cursor=pointer]
+            - checkbox [aria-hidden]
+          - button "Save Changes" [ref=f23e272] [cursor=pointer]
+    - navigation "Main Navigation" [ref=f23e207]:
+      - generic [ref=f23e208]:
+        - link "Trans." [ref=f23e209] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f23e214] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f23e220] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f23e225] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T"

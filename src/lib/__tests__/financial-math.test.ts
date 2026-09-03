@@ -80,9 +80,30 @@ describe('Financial Math Core', () => {
     });
 
     it('handles decimal precision with zero floating point errors', () => {
-      // Classic 0.1 + 0.2 floating point challenge
       const balance = calculateAccountBalance(0, 0.1, 0, 0.2, 0);
       expect(balance.toString()).toBe('0.3');
+    });
+  });
+
+  describe('Double-Entry Transfer Parity & Fee Invariants', () => {
+    it('deducts amount + fee from source and credits amount to destination', () => {
+      const sourceInitial = 50000;
+      const destInitial = 20000;
+      const transferAmount = 10000;
+      const transferFee = 50;
+
+      // Source deduction: 50000 - 10000 - 50 = 39950
+      const sourceBalance = calculateAccountBalance(sourceInitial, 0, 0, 0, transferAmount + transferFee);
+      // Destination addition: 20000 + 10000 = 30000
+      const destBalance = calculateAccountBalance(destInitial, 0, 0, transferAmount, 0);
+
+      expect(sourceBalance.toNumber()).toBe(39950);
+      expect(destBalance.toNumber()).toBe(30000);
+
+      // Parity invariant: Net change in system = -transferFee
+      const totalBefore = sourceInitial + destInitial; // 70000
+      const totalAfter = sourceBalance.toNumber() + destBalance.toNumber(); // 69950
+      expect(totalBefore - totalAfter).toBe(transferFee);
     });
   });
 
@@ -101,13 +122,8 @@ describe('Financial Math Core', () => {
 
       const { totalAssets, totalLiabilities, netWorth } = calculateNetWorth(assets, liabilities);
 
-      // Total Assets = 25000 + 185450 + 450000 + 820000 = 1480450
       expect(totalAssets.toNumber()).toBe(1480450);
-
-      // Total Liabilities = 34200 + 350000 = 384200
       expect(totalLiabilities.toNumber()).toBe(384200);
-
-      // Net Worth = 1480450 - 384200 = 1096250
       expect(netWorth.toNumber()).toBe(1096250);
     });
 

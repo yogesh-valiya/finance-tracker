@@ -45,6 +45,36 @@
 
 ---
 
+### 2026-09-03: Phase 3 — Accounts, Assets & Net Worth Management (account_01 - account_15)
+
+| Screen ID | Reference Image | Screen Name | Route / Modal | Verdict | UI Improvements / Notes |
+|---|---|---|---|:---:|---|
+| `account_01` | `account_01_summary_net_worth.jpeg` | Accounts Overview & Net Worth | `/accounts` | **BETTER** | Bold Net Worth card (Blue Assets, Red Liabilities), 11 group accordions, dual credit card metrics, and quick action headers. |
+| `account_02` | `account_02_total_stats_trends.jpeg` | Total Accounts Stats & Trends | `/accounts/stats` | **BETTER** | 6-Month historical Net Worth trajectory curve (Line Chart) and comparative monthly cashflow (Bar Chart) with theme tokens. |
+| `account_03` | `account_03_cash_daily_ledger.jpeg` | Account Daily Ledger | `/accounts/:id` | **BETTER** | 4-Metric statement header (Deposit, Withdrawal, Total, Balance) with daily grouped transactions and running balances. |
+| `account_04` | `account_04_single_account_stats.jpeg` | Account Analytics | `/accounts/:id/stats` | **BETTER** | Individual account balance trajectory and cashflow distribution graphs using shadcn CSS variables. |
+| `account_05` | `account_05_info_credit_card.jpeg` | Credit Card Configuration | `/accounts/:id/info` | **BETTER** | Statement preview, settlement date (1–31) and payment date pickers with shadcn `Select`, and safe deletion. |
+| `account_08` | `account_08_group_select_modal.jpeg` | Select Classification Group | `/accounts/select-group` | **BETTER** | 11 Group classification cards with icons, liability tags, and description tooltips. |
+| `account_09` | `account_09_add_account_form.jpeg` | Add Account Wizard Form | `/accounts/new` | **BETTER** | Responsive form with shadcn `Select` date pickers, initial amount input, and linked accounts. |
+| `account_13` | `account_13_modify_orders.jpeg` | Modify Orders | `/accounts/reorder` | **BETTER** | Interactive selection ring with checkmark (`✓`), Up/Down reordering controls, and persistence to PocketBase. |
+| `account_14` | `account_14_show_hide_settings.jpeg` | Show/Hide Accounts | `/accounts/visibility` | **BETTER** | Grouped account list with live balances and interactive Eye visibility toggles with status badges. |
+| `account_15` | `account_15_record_difference_confirmation_modal.jpg` | Record Difference Modal | `/accounts/confirm-difference` | **BETTER** | Clear prompt explaining Income/Expense adjustment with `[ YES ]` (Record Entry) and `[ NO ]` (Balance Only). |
+
+---
+
+### 2026-09-03: Requirement.md Points 4.9, 4.10, 4.11 & 4.12 Pixel-Perfect Alignment
+
+| Screen ID | Reference Image | Screen Name | Route / Modal | Verdict | UI Improvements / Notes |
+|---|---|---|---|:---:|---|
+| `expense_01` | `expense_01_form_initial.jpeg` | Expense Transaction Logging Form | `/trans` (Expense Modal) | **BETTER** | Stacked non-overlapping form rows (Date, Account, Category, Amount, Note with autocomplete, Description with Camera shortcut), docked 4x4 arithmetic numpad, and Continue & Red Save actions. |
+| `expense_02` | `expense_02_category_sheet.jpeg` | 2-Column Category Selector Sheet | `/trans` (Category Sheet) | **BETTER** | Left column for parent categories with icons and `>` indicators; right column for dynamic subcategories with `+ Add Subcategory` and `✏️` Edit shortcut. |
+| `expense_03` | `expense_03_account_grid.jpeg` | 3-Column Account Grid Sheet | `/trans` (Account Sheet) | **BETTER** | Clean 3-column responsive card matrix displaying account icons, names, live balances, and `✏️` Edit shortcut. |
+| `income_01` | `income_01_form_initial.jpeg` | Income Transaction Logging Form | `/trans` (Income Modal) | **BETTER** | Blue theme active tab, destination account picker, category sheet, arithmetic numpad, and Blue Save button. |
+| `transfer_01` | `transfer_01_form_initial.jpeg` | Inter-Account Transfer Logging | `/trans` (Transfer Modal) | **BETTER** | Dark theme, dual `From` & `To` account rows with interactive Swap button (`↑↓`), expandable `[ Fees ]` line with dismiss `✕`, and Dark Save button. |
+| `repeat_01` | `repeat_01_context_menu.jpeg` & `repeat_02` | Recurring Repeat Settings Sheet | `/trans` (Rep/Inst. Modal) | **BETTER** | Complete 14-frequency selection list (`Nothing` to `Annually`), advance reflection timing selector (0–3 days), and clean radio check indicators. |
+
+---
+
 ## Phase 2: Settings, Master Data & Configuration Reviews(`More`)
 
 #### 1. Settings Hub (`/more`)

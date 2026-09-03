@@ -7,6 +7,7 @@ import { ProtectedRoute } from './features/auth/ProtectedRoute';
 import { AppShell } from './components/layout/AppShell';
 import { TransPage } from './features/transactions/TransPage';
 import { StatsPage } from './features/stats/StatsPage';
+import { CategoryDeepDivePage } from './features/stats/CategoryDeepDivePage';
 import { AccountsPage } from './features/accounts/AccountsPage';
 import { ModifyOrdersPage } from './features/accounts/ModifyOrdersPage';
 import { ShowHideSettingsPage } from './features/accounts/ShowHideSettingsPage';
@@ -24,6 +25,7 @@ import { SubcategoryManagerPage } from './features/categories/SubcategoryManager
 import { PasscodeSettingsPage } from './features/settings/PasscodeSettingsPage';
 import { CalcBoxPage } from './features/settings/CalcBoxPage';
 import { BackupSettingsPage } from './features/settings/BackupSettingsPage';
+import { RecurringManagerPage } from './features/transactions/recurring/RecurringManagerPage';
 import { HelpPage } from './features/settings/HelpPage';
 import { FeedbackPage } from './features/settings/FeedbackPage';
 import { RecommendPage } from './features/settings/RecommendPage';
@@ -62,8 +64,12 @@ export const router = createBrowserRouter([
         element: <TransPage />,
       },
       {
-        path: 'stats/*',
+        path: 'stats',
         element: <StatsPage />,
+      },
+      {
+        path: 'stats/category/:id',
+        element: <CategoryDeepDivePage />,
       },
 
       // Module 3: Accounts, Assets & Net Worth Routes
@@ -124,6 +130,10 @@ export const router = createBrowserRouter([
           {
             path: 'configuration/sub-currency',
             element: <SubCurrencySettingsPage />,
+          },
+          {
+            path: 'configuration/repeat',
+            element: <RecurringManagerPage />,
           },
           {
             path: 'categories',

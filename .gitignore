@@ -55,3 +55,4 @@ android/app/src/main/assets/capacitor.config.json
 android/app/src/main/assets/capacitor.plugins.json
 
 docs/screens/
+.playwright-mcp/

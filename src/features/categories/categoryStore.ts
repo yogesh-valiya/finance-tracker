@@ -5,6 +5,8 @@ import type { Category, Subcategory } from '@/types';
 interface CategoryState {
   incomeCategories: Category[];
   expenseCategories: Category[];
+  categories: Category[];
+  subcategories: Subcategory[];
   isLoading: boolean;
   error: string | null;
 
@@ -23,6 +25,8 @@ interface CategoryState {
 export const useCategoryStore = create<CategoryState>((set, get) => ({
   incomeCategories: [],
   expenseCategories: [],
+  categories: [],
+  subcategories: [],
   isLoading: false,
   error: null,
 
@@ -46,19 +50,25 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       const subcatMap = new Map<string, Subcategory[]>();
       for (const sub of subcats) {
         const list = subcatMap.get(sub.category) || [];
-        list.push(sub);
+        list.push(sub as Subcategory);
         subcatMap.set(sub.category, list);
       }
 
-      const categoriesWithSubs = cats.map((cat) => ({
+      const categoriesWithSubs: Category[] = cats.map((cat) => ({
         ...cat,
         subcategories: (subcatMap.get(cat.id) || []).sort((a, b) => a.order - b.order),
-      }));
+      })) as Category[];
 
       const incomeCategories = categoriesWithSubs.filter((c) => c.type === 'income');
       const expenseCategories = categoriesWithSubs.filter((c) => c.type === 'expense');
 
-      set({ incomeCategories, expenseCategories, isLoading: false });
+      set({
+        incomeCategories,
+        expenseCategories,
+        categories: categoriesWithSubs,
+        subcategories: subcats as Subcategory[],
+        isLoading: false,
+      });
     } catch (err: any) {
       console.error('Error fetching categories:', err);
       set({ error: err.message || 'Failed to load categories', isLoading: false });
@@ -83,12 +93,20 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     const categoryWithSubs: Category = {
       ...created,
       subcategories: [],
-    };
+    } as Category;
 
     if (type === 'income') {
-      set({ incomeCategories: [...get().incomeCategories, categoryWithSubs] });
+      const nextInc = [...get().incomeCategories, categoryWithSubs];
+      set({
+        incomeCategories: nextInc,
+        categories: [...nextInc, ...get().expenseCategories],
+      });
     } else {
-      set({ expenseCategories: [...get().expenseCategories, categoryWithSubs] });
+      const nextExp = [...get().expenseCategories, categoryWithSubs];
+      set({
+        expenseCategories: nextExp,
+        categories: [...get().incomeCategories, ...nextExp],
+      });
     }
 
     return categoryWithSubs;
@@ -105,11 +123,13 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   },
 
   deleteCategory: async (id) => {
-    // Delete category and let PocketBase cascade delete associated subcategories
     await collections.categories().delete(id);
+    const nextInc = get().incomeCategories.filter((c) => c.id !== id);
+    const nextExp = get().expenseCategories.filter((c) => c.id !== id);
     set({
-      incomeCategories: get().incomeCategories.filter((c) => c.id !== id),
-      expenseCategories: get().expenseCategories.filter((c) => c.id !== id),
+      incomeCategories: nextInc,
+      expenseCategories: nextExp,
+      categories: [...nextInc, ...nextExp],
     });
   },
 
@@ -123,12 +143,11 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       .filter((Boolean as unknown) as (x: any) => x is Category);
 
     if (type === 'income') {
-      set({ incomeCategories: reordered });
+      set({ incomeCategories: reordered, categories: [...reordered, ...get().expenseCategories] });
     } else {
-      set({ expenseCategories: reordered });
+      set({ expenseCategories: reordered, categories: [...get().incomeCategories, ...reordered] });
     }
 
-    // Persist orders in background
     Promise.all(
       categoryIds.map((id, index) =>
         collections.categories().update(id, { order: index })
@@ -154,7 +173,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     });
 
     await get().fetchCategories();
-    return created;
+    return created as Subcategory;
   },
 
   updateSubcategory: async (id, partial) => {

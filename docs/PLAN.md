@@ -167,9 +167,9 @@ All progress tracking, compliance audit reports, visual review verdicts, and cap
 - **9-Tile Settings Hub (`/more`)** *(Ref: `more_01_settings_menu.jpg`)*:
   - Tiles: `Configuration`, `Accounts`, `Passcode`, `CalcBox`, `PC Manager`, `Backup`, `Feedback`, `Help`, `Recommend`.
 - **Master Category Management (`/more/categories`)**:
-  - Income Category list *(Ref: `more_02_income_category_settings.jpg`)*: Add category, emoji picker, rename, delete, reorder.
-  - Expense Category list *(Ref: `more_03_expense_category_settings.jpg`)*: Add category, icon badge, rename, delete, reorder.
-  - Subcategory Management Sheet *(Ref: `more_04_subcategory_settings_food.jpg`)*: Add, rename, delete, reorder subcategories under parent category.
+  - Income Category list *(Ref: `more_02_income_category_settings.jpg`)*: Add category, custom icon/emoji picker with "Remove Icon" option, rename, delete, reorder.
+  - Expense Category list *(Ref: `more_03_expense_category_settings.jpg`)*: Add category, custom icon/emoji picker with "Remove Icon" option, rename, delete, reorder.
+  - Subcategory Management Sheet *(Ref: `more_04_subcategory_settings_food.jpg`)*: Add, custom icon/emoji picker with "Remove Icon" option, rename, delete, reorder subcategories under parent category.
   - Subcategory Master Toggle (`ON`/`OFF`): Globally disables subcategory selection for single-tier logging.
 - **Configuration & Preferences (`/more/configuration`)** *(Refs: `more_05_configuration_settings.jpg`, `more_06_configuration_settings_general.jpg`, `more_07_configuration_settings_advanced.jpg`)*:
   - Main Currency & Sub Currency selector (with manual exchange rate input and default conversion presets).

@@ -235,9 +235,9 @@ Top sub-tabs: `Daily` | `Calendar` | `Monthly` | `Total` | `Note`.
   - Supports inline multi-step mathematical calculations (e.g. `200 + 45 - 15 = 230`).
 - **Category & Subcategory Selector (2-Column Bottom Sheet)**:
   - Header: `Category`, `✏️` Edit shortcut (opens Category Settings), `✕` Close.
-  - Left Column: Parent expense categories with icon badges (`🍜 Food`, `🧑‍🤝‍🧑 Social Life`, `🐶 Pets`, `🚖 Transport`, `🖼️ Culture`, `🪑 Household`, etc.) with `>` chevron indicators.
-  - Right Column: Dynamic subcategories belonging to the active parent category (e.g. for `Food`: `Lunch`, `Dinner`, `Eating out`, `Beverages`).
-  - Selection formats the field as `Icon Category/Subcategory` (e.g. `🍜 Food/Dinner`).
+  - Left Column: Parent expense categories with icon badges (`🍜 Food`, `🧑‍🤝‍🧑 Social Life`, `🐶 Pets`, `🚖 Transport`, `🖼️ Culture`, `🪑 Household`, etc.) with `>` chevron indicators. If a category icon is removed/not set, renders a fallback tag badge or clean label.
+  - Right Column: Dynamic subcategories belonging to the active parent category (e.g. for `Food`: `Lunch`, `Dinner`, `Eating out`, `Beverages`), displaying subcategory custom icon badge if configured.
+  - Selection formats the field as `Icon Category/Subcategory` (e.g. `🍜 Food/Dinner`, or `Category/Subcategory` when icons are removed).
 - **Account Selector (3-Column Grid Sheet)**:
   - Header: `Accounts`, Layout switch, `✏️` Edit shortcut, `✕` Close.
   - 3-column responsive grid of active accounts (`Cash`, `Wallet`, `SBI Savings`, `AXIS Salary Ac`, `HSBC CC`, `AXIS DC`, `Mutual Fund`, `Car EMI`, `Mediclaim`, `Term Insurance`, etc.).
@@ -605,9 +605,14 @@ Top sub-tabs: `Daily` | `Calendar` | `Monthly` | `Total` | `Note`.
   <img src="screens/more_04_subcategory_settings_food.jpg" alt="Subcategory Settings" width="240" />
 </p>
 
-- Add, edit emoji/name, delete, and reorder Income and Expense categories.
-- Subcategory editor: Add, rename, delete, and reorder subcategories per category.
-- **Subcategory Master Toggle (`ON`/`OFF`)**: When `OFF`, hides subcategories globally for simplified single-tier logging.
+- **Master Category Management (`Income` & `Expense`)**:
+  - Add new categories, rename, delete (with transaction cascade/reconciliation safeguards), and reorder via up/down controls.
+  - **Custom Icon Selection**: Ability to choose any custom emoji/symbol (via direct text input or from a curated quick-select palette) for each category.
+  - **Remove Icon Option**: Dedicated "Remove Icon" action allowing categories to exist with no icon; rendered cleanly with a fallback placeholder tag badge (`🏷️` / `Tag`) or text-only label across feeds and selectors.
+- **Subcategory Management**:
+  - Subcategory editor per category: Add new subcategories, rename, delete, and reorder.
+  - **Subcategory Custom Icon & Remove Option**: Full parity with parent categories—subcategories support choosing a custom icon/emoji or removing the icon completely.
+- **Subcategory Master Toggle (`ON`/`OFF`)**: When `OFF`, hides subcategories globally across transaction forms and selectors for simplified single-tier logging.
 
 ### 7.3 General Preferences & Customization
 <p align="center">

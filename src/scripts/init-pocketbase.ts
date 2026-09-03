@@ -133,6 +133,7 @@ export async function initPocketBaseSchema() {
       { name: 'user', type: 'relation', required: true, collectionId: usersCol.id, cascadeDelete: true, maxSelect: 1 },
       { name: 'category', type: 'relation', required: true, collectionId: categoriesCol.id, cascadeDelete: true, maxSelect: 1 },
       { name: 'name', type: 'text', required: true },
+      { name: 'icon', type: 'text', required: false },
       { name: 'order', type: 'number', required: false },
     ],
   };

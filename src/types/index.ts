@@ -78,6 +78,7 @@ export interface Subcategory {
   user: string;
   category: string;
   name: string;
+  icon?: string;
   order: number;
   created?: string;
   updated?: string;
@@ -179,6 +180,7 @@ export interface UserPreference {
   passcode?: string;
   is_passcode_enabled: boolean;
   is_biometrics_enabled: boolean;
+  swipe_action?: 'date' | 'tab';
   time_input_mode: 'manual' | 'auto';
   show_description: boolean;
   autocomplete: boolean;

@@ -1,0 +1,65 @@
+- generic [ref=f7e2]:
+  - generic [ref=f7e12]:
+    - main [ref=f7e13]:
+      - generic [ref=f7e14]:
+        - generic [ref=f7e15]:
+          - generic [ref=f7e16]:
+            - button [ref=f7e17] [cursor=pointer]
+            - generic [ref=f7e18]:
+              - generic [ref=f7e19]: 🖼️
+              - generic [ref=f7e20]:
+                - heading "Culture Subcategories" [level=1] [ref=f7e21]
+                - paragraph [ref=f7e22]: 4 subcategories configured
+          - button "Add" [ref=f7e23] [cursor=pointer]
+        - generic [ref=f7e24]:
+          - generic [ref=f7e25]:
+            - generic [ref=f7e26]:
+              - generic [ref=f7e27]: "1"
+              - generic [ref=f7e28]: B
+              - generic [ref=f7e30]: Books
+            - generic [ref=f7e31]:
+              - button "Move Up" [disabled]
+              - button "Move Down" [ref=f7e32] [cursor=pointer]
+              - button "Edit Subcategory" [ref=f7e33] [cursor=pointer]
+              - button "Delete Subcategory" [ref=f7e34] [cursor=pointer]
+          - generic [ref=f7e35]:
+            - generic [ref=f7e36]:
+              - generic [ref=f7e37]: "2"
+              - generic [ref=f7e38]: M
+              - generic [ref=f7e40]: Movie
+            - generic [ref=f7e41]:
+              - button "Move Up" [ref=f7e42] [cursor=pointer]
+              - button "Move Down" [ref=f7e43] [cursor=pointer]
+              - button "Edit Subcategory" [ref=f7e44] [cursor=pointer]
+              - button "Delete Subcategory" [ref=f7e45] [cursor=pointer]
+          - generic [ref=f7e46]:
+            - generic [ref=f7e47]:
+              - generic [ref=f7e48]: "3"
+              - generic [ref=f7e49]: M
+              - generic [ref=f7e51]: Music
+            - generic [ref=f7e52]:
+              - button "Move Up" [ref=f7e53] [cursor=pointer]
+              - button "Move Down" [ref=f7e54] [cursor=pointer]
+              - button "Edit Subcategory" [ref=f7e55] [cursor=pointer]
+              - button "Delete Subcategory" [ref=f7e56] [cursor=pointer]
+          - generic [ref=f7e57]:
+            - generic [ref=f7e58]:
+              - generic [ref=f7e59]: "4"
+              - generic [ref=f7e60]: A
+              - generic [ref=f7e62]: Apps
+            - generic [ref=f7e63]:
+              - button "Move Up" [ref=f7e64] [cursor=pointer]
+              - button "Move Down" [disabled]
+              - button "Edit Subcategory" [ref=f7e65] [cursor=pointer]
+              - button "Delete Subcategory" [ref=f7e66] [cursor=pointer]
+    - navigation "Main Navigation" [ref=f7e67]:
+      - generic [ref=f7e68]:
+        - link "Trans." [ref=f7e69] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f7e74] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f7e80] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f7e85] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T"

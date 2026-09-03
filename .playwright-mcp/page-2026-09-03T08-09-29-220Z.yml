@@ -1,0 +1,78 @@
+- generic [ref=f9e2]:
+  - generic [ref=f9e12]:
+    - main [ref=f9e13]:
+      - generic [ref=f9e14]:
+        - generic [ref=f9e15]:
+          - generic [ref=f9e16]:
+            - button [ref=f9e17] [cursor=pointer]
+            - generic [ref=f9e18]:
+              - heading "Category Settings" [level=1] [ref=f9e19]
+              - paragraph [ref=f9e20]: Manage Income & Expense classifications
+          - button "Add" [ref=f9e21] [cursor=pointer]
+        - generic [ref=f9e23]:
+          - generic [ref=f9e24]:
+            - generic [ref=f9e25]: Enable Subcategories
+            - generic [ref=f9e26]: Toggle 2-tier subcategory hierarchy for transactions
+          - switch "Toggle Subcategories" [checked] [ref=f9e27] [cursor=pointer]
+        - generic [ref=f9e28]:
+          - tablist [ref=f9e29]:
+            - tab "Income (5)" [active] [selected] [ref=f9e30] [cursor=pointer]
+            - tab "Expense (13)" [ref=f9e31] [cursor=pointer]
+          - tabpanel "Income (5)" [ref=f9e32]:
+            - generic [ref=f9e33]:
+              - generic [ref=f9e34] [cursor=pointer]:
+                - generic [ref=f9e35]:
+                  - generic [ref=f9e36]: 🤑
+                  - generic [ref=f9e38]: Allowance
+                - generic [ref=f9e41]:
+                  - button "Move Up" [disabled]
+                  - button "Move Down" [ref=f9e42]
+                  - button "Edit Category" [ref=f9e43]
+                  - button "Delete Category" [ref=f9e44]
+              - generic [ref=f9e48] [cursor=pointer]:
+                - generic [ref=f9e49]:
+                  - generic [ref=f9e50]: 💰
+                  - generic [ref=f9e52]: Salary
+                - generic [ref=f9e55]:
+                  - button "Move Up" [ref=f9e56]
+                  - button "Move Down" [ref=f9e57]
+                  - button "Edit Category" [ref=f9e58]
+                  - button "Delete Category" [ref=f9e59]
+              - generic [ref=f9e63] [cursor=pointer]:
+                - generic [ref=f9e64]:
+                  - generic [ref=f9e65]: 💵
+                  - generic [ref=f9e67]: Petty cash
+                - generic [ref=f9e70]:
+                  - button "Move Up" [ref=f9e71]
+                  - button "Move Down" [ref=f9e72]
+                  - button "Edit Category" [ref=f9e73]
+                  - button "Delete Category" [ref=f9e74]
+              - generic [ref=f9e78] [cursor=pointer]:
+                - generic [ref=f9e79]:
+                  - generic [ref=f9e80]: 🏅
+                  - generic [ref=f9e82]: Bonus
+                - generic [ref=f9e85]:
+                  - button "Move Up" [ref=f9e86]
+                  - button "Move Down" [ref=f9e87]
+                  - button "Edit Category" [ref=f9e88]
+                  - button "Delete Category" [ref=f9e89]
+              - generic [ref=f9e93] [cursor=pointer]:
+                - generic [ref=f9e94]:
+                  - generic [ref=f9e95]: 💸
+                  - generic [ref=f9e97]: Other
+                - generic [ref=f9e100]:
+                  - button "Move Up" [ref=f9e101]
+                  - button "Move Down" [disabled]
+                  - button "Edit Category" [ref=f9e102]
+                  - button "Delete Category" [ref=f9e103]
+    - navigation "Main Navigation" [ref=f9e107]:
+      - generic [ref=f9e108]:
+        - link "Trans." [ref=f9e109] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f9e114] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f9e120] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f9e125] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T"

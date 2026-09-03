@@ -1,11 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../auth/authStore';
+import { useLockStore } from '../lock/lockStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
-  Menu,
   Sliders,
   Landmark,
   Lock,
@@ -17,37 +18,94 @@ import {
   Share2,
   LogOut,
   Palette,
+  ShieldCheck,
+  ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const MorePage: React.FC = () => {
+  const navigate = useNavigate();
   const { preferences, updatePreferences, logout } = useAuthStore();
+  const { isPasscodeSet } = useLockStore();
 
   const isSetB = preferences?.color_scheme === 'set_b';
+  const currency = preferences?.main_currency || 'INR';
 
   const handleToggleColorScheme = async () => {
     const nextScheme = isSetB ? 'set_a' : 'set_b';
     await updatePreferences({ color_scheme: nextScheme });
-    toast.success(`Color scheme switched to ${nextScheme === 'set_a' ? 'Set A (Blue/Red)' : 'Set B (Red/Blue)'}`);
+    toast.success(
+      `Color scheme switched to ${nextScheme === 'set_a' ? 'Set A (Blue/Red)' : 'Set B (Red/Blue)'}`
+    );
   };
 
   const TILES = [
-    { title: 'Configuration', icon: Sliders, desc: 'Categories, billing dates, currencies' },
-    { title: 'Accounts', icon: Landmark, desc: 'Account groups & ordering' },
-    { title: 'Passcode', icon: Lock, desc: 'PIN & biometrics unlock' },
-    { title: 'CalcBox', icon: Calculator, desc: 'Financial calculations' },
-    { title: 'PC Manager', icon: Laptop, desc: 'Web link sync' },
-    { title: 'Backup', icon: CloudUpload, desc: 'JSON backup & Excel export' },
-    { title: 'Feedback', icon: MessageSquare, desc: 'Contact support' },
-    { title: 'Help', icon: HelpCircle, desc: 'User guide' },
-    { title: 'Recommend', icon: Share2, desc: 'Share app' },
+    {
+      title: 'Configuration',
+      icon: Sliders,
+      desc: 'Categories & Preferences',
+      path: '/more/configuration',
+      badge: `${currency} • ${preferences?.monthly_start_date || 1}st`,
+    },
+    {
+      title: 'Accounts',
+      icon: Landmark,
+      desc: 'Group classification',
+      path: '/accounts',
+    },
+    {
+      title: 'Passcode',
+      icon: Lock,
+      desc: 'PIN & Biometrics',
+      path: '/more/passcode',
+      badge: isPasscodeSet ? 'Active' : undefined,
+    },
+    {
+      title: 'CalcBox',
+      icon: Calculator,
+      desc: 'EMI & Investment math',
+      path: '/more/calcbox',
+    },
+    {
+      title: 'PC Manager',
+      icon: Laptop,
+      desc: 'Desktop web link',
+      path: '/more/pc-manager',
+    },
+    {
+      title: 'Backup',
+      icon: CloudUpload,
+      desc: 'Sync & JSON/CSV',
+      path: '/more/backup',
+    },
+    {
+      title: 'Feedback',
+      icon: MessageSquare,
+      desc: 'Contact support',
+      path: '/more/feedback',
+    },
+    {
+      title: 'Help',
+      icon: HelpCircle,
+      desc: 'User guide & FAQ',
+      path: '/more/help',
+    },
+    {
+      title: 'Recommend',
+      icon: Share2,
+      desc: 'Share application',
+      path: '/more/recommend',
+    },
   ];
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-base font-bold text-foreground">Settings & More</h1>
-        <Badge variant="outline" className="text-[10px]">Phase 2 Hub</Badge>
+        <Badge variant="outline" className="text-[10px] font-semibold">
+          Phase 2 Complete
+        </Badge>
       </div>
 
       {/* 3x3 Settings Hub Grid */}
@@ -58,8 +116,8 @@ export const MorePage: React.FC = () => {
             <Button
               key={tile.title}
               variant="outline"
-              onClick={() => toast.info(`${tile.title} will be configured in Phase 2`)}
-              className="flex flex-col items-center justify-center p-3 h-auto rounded-xl border-border/60 bg-card hover:bg-accent/40 active:scale-95 transition-all text-center gap-1.5 shadow-2xs font-normal"
+              onClick={() => navigate(tile.path)}
+              className="relative flex flex-col items-center justify-center p-3 h-auto rounded-xl border-border/60 bg-card hover:bg-accent/40 active:scale-95 transition-all text-center gap-1.5 shadow-2xs font-normal"
             >
               <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Icon className="size-4.5" />
@@ -67,13 +125,18 @@ export const MorePage: React.FC = () => {
               <span className="text-xs font-semibold text-foreground line-clamp-1">
                 {tile.title}
               </span>
+              {tile.badge && (
+                <span className="text-[8.5px] font-mono text-muted-foreground font-semibold line-clamp-1 -mt-0.5">
+                  {tile.badge}
+                </span>
+              )}
             </Button>
           );
         })}
       </div>
 
-      {/* Preferences Preview Card */}
-      <Card className="border-border/60 shadow-2xs mt-2">
+      {/* Quick Theme Switcher Card */}
+      <Card className="border-border/60 shadow-2xs mt-1">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
             <Palette className="size-3.5 text-primary" />
@@ -101,7 +164,10 @@ export const MorePage: React.FC = () => {
             <Button
               variant="destructive"
               className="w-full h-9 gap-2 text-xs font-semibold"
-              onClick={() => logout()}
+              onClick={() => {
+                logout();
+                toast.info('Signed out successfully');
+              }}
             >
               <LogOut className="size-3.5" />
               Sign Out

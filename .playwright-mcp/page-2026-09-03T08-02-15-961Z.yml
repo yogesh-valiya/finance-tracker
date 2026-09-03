@@ -1,0 +1,116 @@
+- generic [ref=f3e2]:
+  - generic [ref=f3e34]:
+    - main [ref=f3e35]:
+      - generic [ref=f3e36]:
+        - generic [ref=f3e37]:
+          - generic [ref=f3e43]:
+            - heading "Money Manager" [level=1] [ref=f3e44]
+            - paragraph [ref=f3e45]: demo@moneymanager.app
+          - generic [ref=f3e46]:
+            - button "Refresh data" [ref=f3e47] [cursor=pointer]
+            - button "Sign Out" [ref=f3e48] [cursor=pointer]
+        - generic [ref=f3e49]:
+          - generic [ref=f3e50]:
+            - generic [ref=f3e51]:
+              - generic [ref=f3e52]: Phase 0 & 1 Complete
+              - generic [ref=f3e55]: INR
+            - generic [ref=f3e56]: Welcome back, Demo Trader!
+          - generic [ref=f3e57]:
+            - paragraph [ref=f3e58]: PocketBase is connected with active master data, double-entry financial math engine, and seeded account hierarchy.
+            - generic [ref=f3e59]:
+              - generic [ref=f3e60]:
+                - generic [ref=f3e61]: Accounts
+                - text: "8"
+              - generic [ref=f3e62]:
+                - generic [ref=f3e63]: Categories
+                - text: "18"
+              - generic [ref=f3e64]:
+                - generic [ref=f3e65]: Ledger Txs
+                - text: "10"
+        - generic [ref=f3e66]:
+          - generic [ref=f3e67]:
+            - heading "Active Accounts (8)" [level=2] [ref=f3e68]
+            - generic [ref=f3e69]: Group Classification
+          - generic [ref=f3e70]:
+            - generic [ref=f3e71]:
+              - generic [ref=f3e78]:
+                - generic [ref=f3e79]: Cash
+                - text: cash
+              - generic [ref=f3e80]: ₹ 25,000.00
+            - generic [ref=f3e81]:
+              - generic [ref=f3e88]:
+                - generic [ref=f3e89]: AXIS Salary Ac
+                - text: accounts
+              - generic [ref=f3e90]: ₹ 1,85,455.00
+            - generic [ref=f3e91]:
+              - generic [ref=f3e98]:
+                - generic [ref=f3e99]: SBI Savings
+                - text: savings
+              - generic [ref=f3e100]: ₹ 4,50,000.00
+            - generic [ref=f3e101]:
+              - generic [ref=f3e108]:
+                - generic [ref=f3e109]: HSBC CC
+                - text: card
+              - generic [ref=f3e110]: ₹ 34,200.00
+            - generic [ref=f3e111]:
+              - generic [ref=f3e118]:
+                - generic [ref=f3e119]: AXIS DC
+                - text: debit card
+              - generic [ref=f3e120]: ₹ 0.00
+            - generic [ref=f3e121]:
+              - generic [ref=f3e128]:
+                - generic [ref=f3e129]: Mutual Fund Portfolio
+                - text: investments
+              - generic [ref=f3e130]: ₹ 8,20,000.00
+            - generic [ref=f3e131]:
+              - generic [ref=f3e138]:
+                - generic [ref=f3e139]: Car Loan
+                - text: loan
+              - generic [ref=f3e140]: ₹ -3,50,000.00
+            - generic [ref=f3e141]:
+              - generic [ref=f3e148]:
+                - generic [ref=f3e149]: Mediclaim Policy
+                - text: insurance
+              - generic [ref=f3e150]: ₹ 0.00
+        - generic [ref=f3e151]:
+          - heading "Recent Seeded Transactions" [level=2] [ref=f3e152]
+          - generic [ref=f3e153]:
+            - generic [ref=f3e154]:
+              - generic [ref=f3e160]:
+                - generic [ref=f3e161]: Dinner at Maharaja Restaurant
+                - text: 03 Sept 2026
+              - generic [ref=f3e162]: "-₹ 2,850.00"
+            - generic [ref=f3e163]:
+              - generic [ref=f3e168]:
+                - generic [ref=f3e169]: ATM cash withdrawal
+                - text: 02 Sept 2026
+              - generic [ref=f3e170]: ₹ 10,000.00
+            - generic [ref=f3e171]:
+              - generic [ref=f3e177]:
+                - generic [ref=f3e178]: Office lunch thali
+                - text: 01 Sept 2026
+              - generic [ref=f3e179]: "-₹ 450.00"
+            - generic [ref=f3e180]:
+              - generic [ref=f3e186]:
+                - generic [ref=f3e187]: September Salary Credit
+                - text: 01 Sept 2026
+              - generic [ref=f3e188]: +₹ 1,50,000.00
+            - generic [ref=f3e189]:
+              - generic [ref=f3e194]:
+                - generic [ref=f3e195]: Fixed deposit transfer
+                - text: 29 Aug 2026
+              - generic [ref=f3e196]: ₹ 15,000.00
+    - navigation "Main Navigation" [ref=f3e197]:
+      - generic [ref=f3e198]:
+        - link "Trans." [ref=f3e199] [cursor=pointer]:
+          - /url: /trans
+        - link "Stats" [ref=f3e204] [cursor=pointer]:
+          - /url: /stats
+        - link "Accounts" [ref=f3e210] [cursor=pointer]:
+          - /url: /accounts
+        - link "More" [ref=f3e215] [cursor=pointer]:
+          - /url: /more
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=f3e219]:
+        - generic [ref=f3e224]: Welcome to the Demo Workspace!

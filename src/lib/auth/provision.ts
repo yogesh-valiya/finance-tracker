@@ -29,6 +29,32 @@ export async function provisionUser(sessionUser: SessionUser) {
         where: { email: sessionUser.email },
       });
       if (existingByEmail) {
+        const existingSettings = await tx.userSettings.findUnique({
+          where: { userId: existingByEmail.id },
+        });
+        if (!existingSettings) {
+          await tx.userSettings.create({
+            data: {
+              userId: existingByEmail.id,
+              baseCurrency: "INR",
+              startScreen: "DAILY",
+              monthlyStartDate: 1,
+              weeklyStartDay: "MONDAY",
+              carryOver: false,
+              swipeGesture: "CHANGE_DATE",
+              colorScheme: "SET_A",
+              timeInput: "AUTO_STAMP",
+              showDescription: false,
+              autocomplete: true,
+              inputOrder: "FROM_AMOUNT",
+              noteButton: false,
+              subcategoryEnabled: true,
+              passcodeEnabled: false,
+              reminderEnabled: false,
+            },
+          });
+        }
+
         // Relink to the current Firebase UID
         return tx.user.update({
           where: { id: existingByEmail.id },

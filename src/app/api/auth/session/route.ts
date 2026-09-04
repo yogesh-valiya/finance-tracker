@@ -20,12 +20,15 @@ export async function POST(req: Request) {
     // Automatically provision user with default seed accounts and categories
     const dbUser = await provisionUser(sessionUser);
 
-    // Set 14-day session cookie
+    // Set 14-day session cookie (only enforce Secure flag when request is actually HTTPS)
+    const forwardedProto = req.headers.get("x-forwarded-proto");
+    const isHttps = forwardedProto === "https" || req.url.startsWith("https://");
+
     const cookieStore = await cookies();
     cookieStore.set("__session", idToken, {
       maxAge: 14 * 24 * 60 * 60,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       path: "/",
     });

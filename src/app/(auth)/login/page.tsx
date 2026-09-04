@@ -35,8 +35,7 @@ function LoginForm() {
       throw new Error(data.error || "Failed to establish authenticated session");
     }
 
-    router.push(returnUrl);
-    router.refresh();
+    window.location.href = returnUrl;
   }
 
   async function handleSubmit(e: React.FormEvent) {

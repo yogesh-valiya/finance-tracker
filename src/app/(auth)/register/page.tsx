@@ -34,8 +34,7 @@ export default function RegisterPage() {
       throw new Error(data.error || "Failed to establish user account");
     }
 
-    router.push("/transactions");
-    router.refresh();
+    window.location.href = "/transactions";
   }
 
   async function handleSubmit(e: React.FormEvent) {

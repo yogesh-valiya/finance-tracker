@@ -5,12 +5,28 @@ on:
     branches:
       - master
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.agents/**'
+      - '*.png'
+      - '*.jpg'
+      - '*.jpeg'
+      - '*.webp'
+      - '*.gif'
+      - '*.svg'
+      - '.gitignore'
   workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
     name: Deploy to Remote Server
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Execute Remote Deployment via SSH
@@ -39,13 +55,13 @@ jobs:
 
             cd "$DEPLOY_DIR"
 
-            # 2. Fetch & Pull Latest Changes
+            # 2. Shallow Fetch & Reset to latest commit (minimizes network ingress/egress)
             echo "==> Fetching latest changes from Git..."
-            git fetch --all
             CURRENT_BRANCH="${{ github.ref_name }}"
             if [ -z "$CURRENT_BRANCH" ]; then
               CURRENT_BRANCH="master"
             fi
+            git fetch --depth=1 origin "$CURRENT_BRANCH"
             git checkout "$CURRENT_BRANCH"
             git reset --hard "origin/$CURRENT_BRANCH"
 
@@ -60,31 +76,67 @@ jobs:
               fi
             fi
 
-            # 4. Deploy using Docker Compose (Recommended) or PM2/Node
+            # 4. Deploy using Docker Compose with layer caching & port conflict protection
             if command -v docker &> /dev/null && docker compose version &> /dev/null; then
               echo "==> Docker Compose detected. Starting container deployment..."
 
-              # Ensure database container is running and healthy
+              # Enable BuildKit for faster cached builds
+              export DOCKER_BUILDKIT=1
+              export COMPOSE_DOCKER_CLI_BUILD=1
+
+              # Read configured port (defaults to 3000)
+              TARGET_PORT=$(grep -E "^APP_PORT=" .env | cut -d '=' -f2 | tr -d '"' | tr -d "'" 2>/dev/null || true)
+              TARGET_PORT="${TARGET_PORT:-3000}"
+              echo "==> Target application port: $TARGET_PORT"
+
+              # 4a. Stop and remove existing app container to release port 3000
+              docker compose stop app 2>/dev/null || true
+              docker compose rm -f app 2>/dev/null || true
+              docker stop finance-tracker-app 2>/dev/null || true
+              docker rm -f finance-tracker-app 2>/dev/null || true
+
+              # 4b. Clear any conflicting orphan container bound to port
+              CONFLICTING_CONTAINER=$(docker ps -q --filter "publish=$TARGET_PORT" 2>/dev/null || true)
+              if [ -n "$CONFLICTING_CONTAINER" ]; then
+                echo "==> Stopping conflicting container on port $TARGET_PORT: $CONFLICTING_CONTAINER"
+                docker stop "$CONFLICTING_CONTAINER" 2>/dev/null || true
+                docker rm -f "$CONFLICTING_CONTAINER" 2>/dev/null || true
+              fi
+
+              # 4c. Clear any conflicting host process (e.g. old pm2 / node dev)
+              if command -v fuser &> /dev/null; then
+                fuser -k -n tcp "$TARGET_PORT" 2>/dev/null || true
+              elif command -v lsof &> /dev/null; then
+                PID=$(lsof -ti :"$TARGET_PORT" 2>/dev/null || true)
+                if [ -n "$PID" ]; then
+                  echo "==> Terminating conflicting host process on port $TARGET_PORT (PID: $PID)"
+                  kill -9 "$PID" 2>/dev/null || true
+                fi
+              fi
+
+              # 4d. Ensure database container is running and healthy
               docker compose up -d db
 
-              # Build application image with latest code
+              # 4e. Build application image with BuildKit layer caching (skips redundant npm ci)
+              echo "==> Building application image with layer cache..."
               docker compose build app
 
-              # Recreate application container
+              # 4f. Start application container
+              echo "==> Starting application container on port $TARGET_PORT..."
               docker compose up -d app
 
-              # Apply database schema updates
+              # 4g. Apply database schema updates
               echo "==> Synchronizing database schema with Prisma..."
               docker compose exec -T app npx prisma db push --accept-data-loss
 
-              # Clean up old unused images to conserve server disk space
+              # 4h. Clean up old unused images to conserve server disk space
               echo "==> Pruning dangling docker images..."
               docker image prune -f
 
               echo "==> Docker deployment completed successfully!"
             else
               echo "==> Deploying with Node.js and PM2..."
-              npm ci
+              npm ci --prefer-offline
               npx prisma generate
               npx prisma db push --accept-data-loss
               npm run build

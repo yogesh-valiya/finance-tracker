@@ -23,6 +23,24 @@ export async function provisionUser(sessionUser: SessionUser) {
     });
     if (existing) return existing;
 
+    // Check if user already exists with this email (e.g. seeded or created under a different/reset Firebase project)
+    if (sessionUser.email) {
+      const existingByEmail = await tx.user.findUnique({
+        where: { email: sessionUser.email },
+      });
+      if (existingByEmail) {
+        // Relink to the current Firebase UID
+        return tx.user.update({
+          where: { id: existingByEmail.id },
+          data: {
+            firebaseUid: sessionUser.uid,
+            displayName: sessionUser.name || existingByEmail.displayName,
+            avatarUrl: sessionUser.picture || existingByEmail.avatarUrl,
+          },
+        });
+      }
+    }
+
     const user = await tx.user.create({
       data: {
         firebaseUid: sessionUser.uid,

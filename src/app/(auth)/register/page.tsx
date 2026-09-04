@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUpWithEmail, signInWithGoogle } from "@/lib/firebase/client";
+import { signUpWithEmail, signInWithEmail, signInWithGoogle } from "@/lib/firebase/client";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,31 @@ export default function RegisterPage() {
     try {
       setError("");
       setIsLoading(true);
-      const userCredential = await signUpWithEmail(email, password);
+
+      let userCredential;
+      try {
+        userCredential = await signUpWithEmail(email, password);
+      } catch (signUpErr: unknown) {
+        const errObj = signUpErr as { code?: string; message?: string };
+        const isEmailInUse =
+          errObj?.code === "auth/email-already-in-use" ||
+          errObj?.message?.includes("email-already-in-use");
+
+        if (isEmailInUse) {
+          // If the email is already registered in Firebase, attempt to sign in with the provided credentials.
+          // The session establishment will automatically provision the user in PostgreSQL if missing.
+          try {
+            userCredential = await signInWithEmail(email, password);
+          } catch {
+            throw new Error(
+              "An account with this email already exists in Firebase. The password entered does not match. Please log in with your existing password or use Forgot Password."
+            );
+          }
+        } else {
+          throw signUpErr;
+        }
+      }
+
       const idToken = await userCredential.user.getIdToken();
       await establishSession(idToken);
     } catch (err: unknown) {

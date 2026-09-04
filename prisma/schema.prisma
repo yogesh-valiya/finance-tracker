@@ -1,0 +1,277 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccountGroup {
+  CASH
+  BANK_ACCOUNT
+  CREDIT_CARD
+  DEBIT_CARD
+  SAVINGS
+  PREPAID
+  INVESTMENT
+  OVERDRAFT
+  LOAN
+  INSURANCE
+  OTHER
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKDAYS
+  WEEKEND
+  WEEKLY
+  BIWEEKLY
+  EVERY_4_WEEKS
+  MONTHLY
+  END_OF_MONTH
+  EVERY_2_MONTHS
+  EVERY_3_MONTHS
+  EVERY_4_MONTHS
+  EVERY_6_MONTHS
+  ANNUALLY
+}
+
+enum RecurringTiming {
+  ON_DATE
+  IN_ADVANCE
+}
+
+enum StartScreen {
+  DAILY
+  CALENDAR
+}
+
+enum WeeklyStartDay {
+  SUNDAY
+  MONDAY
+}
+
+enum SwipeGesture {
+  CHANGE_DATE
+  CHANGE_TAB
+}
+
+enum ColorScheme {
+  SET_A
+  SET_B
+}
+
+enum TimeInputMode {
+  MANUAL
+  AUTO_STAMP
+}
+
+enum InputOrder {
+  FROM_AMOUNT
+  FROM_CATEGORY
+}
+
+model User {
+  id           String         @id @default(cuid())
+  firebaseUid  String         @unique
+  email        String         @unique
+  displayName  String?
+  avatarUrl    String?
+  baseCurrency String         @default("INR")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  settings     UserSettings?
+  accounts     Account[]
+  categories   Category[]
+  subcategories Subcategory[]
+  transactions Transaction[]
+  recurringRules RecurringRule[]
+  bookmarks    Bookmark[]
+}
+
+model UserSettings {
+  id                 String         @id @default(cuid())
+  userId             String         @unique
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseCurrency       String         @default("INR")
+  subCurrency        String?
+  exchangeRate       Decimal?       @db.Decimal(19, 4)
+  startScreen        StartScreen    @default(DAILY)
+  monthlyStartDate   Int            @default(1)
+  weeklyStartDay     WeeklyStartDay @default(MONDAY)
+  carryOver          Boolean        @default(false)
+  swipeGesture       SwipeGesture   @default(CHANGE_DATE)
+  colorScheme        ColorScheme    @default(SET_A)
+  timeInput          TimeInputMode  @default(AUTO_STAMP)
+  showDescription    Boolean        @default(false)
+  autocomplete        Boolean        @default(true)
+  inputOrder         InputOrder     @default(FROM_AMOUNT)
+  noteButton         Boolean        @default(false)
+  subcategoryEnabled Boolean        @default(true)
+  passcodeEnabled    Boolean        @default(false)
+  passcodeHash       String?
+  reminderEnabled    Boolean        @default(false)
+  reminderTime       String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model Account {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  group           AccountGroup
+  initialBalance  Decimal       @default(0) @db.Decimal(19, 4)
+  description     String?
+  includeInTotals Boolean       @default(true)
+  isHidden        Boolean       @default(false)
+  sortOrder       Int           @default(0)
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  transactionsFrom Transaction[] @relation("AccountFrom")
+  transactionsTo   Transaction[] @relation("AccountTo")
+  recurringFrom    RecurringRule[] @relation("RecurringAccountFrom")
+  recurringTo      RecurringRule[] @relation("RecurringAccountTo")
+  bookmarksFrom    Bookmark[]    @relation("BookmarkAccountFrom")
+  bookmarksTo      Bookmark[]    @relation("BookmarkAccountTo")
+
+  @@index([userId, group])
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  emoji         String
+  type          CategoryType
+  sortOrder     Int           @default(0)
+  isDefault     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+
+  subcategories Subcategory[]
+  transactions  Transaction[]
+  recurringRules RecurringRule[]
+  bookmarks     Bookmark[]
+
+  @@index([userId, type])
+}
+
+model Subcategory {
+  id          String        @id @default(cuid())
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  sortOrder   Int           @default(0)
+  isDefault   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  transactions Transaction[]
+  recurringRules RecurringRule[]
+  bookmarks    Bookmark[]
+
+  @@index([userId, categoryId])
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            TransactionType
+  amount          Decimal         @db.Decimal(19, 4)
+  date            DateTime
+  time            DateTime?
+  accountId       String
+  account         Account         @relation("AccountFrom", fields: [accountId], references: [id], onDelete: Restrict)
+  toAccountId     String?
+  toAccount       Account?        @relation("AccountTo", fields: [toAccountId], references: [id], onDelete: Restrict)
+  categoryId      String?
+  category        Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategoryId   String?
+  subcategory     Subcategory?    @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  note            String?
+  description     String?
+  fee             Decimal?        @db.Decimal(19, 4)
+  isBookmarked    Boolean         @default(false)
+  recurringRuleId String?
+  recurringRule   RecurringRule?  @relation(fields: [recurringRuleId], references: [id], onDelete: SetNull)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([userId, date])
+  @@index([userId, accountId, date])
+  @@index([userId, categoryId, date])
+}
+
+model RecurringRule {
+  id                String             @id @default(cuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              TransactionType
+  frequency         RecurringFrequency
+  timing            RecurringTiming    @default(ON_DATE)
+  advanceDays       Int?               @default(0)
+  nextExecutionDate DateTime
+  accountId         String
+  account           Account            @relation("RecurringAccountFrom", fields: [accountId], references: [id], onDelete: Cascade)
+  toAccountId       String?
+  toAccount         Account?           @relation("RecurringAccountTo", fields: [toAccountId], references: [id], onDelete: SetNull)
+  categoryId        String?
+  category          Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategoryId     String?
+  subcategory       Subcategory?       @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  amount            Decimal            @db.Decimal(19, 4)
+  fee               Decimal?           @db.Decimal(19, 4)
+  note              String?
+  description       String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  transactions      Transaction[]
+
+  @@index([userId, nextExecutionDate])
+}
+
+model Bookmark {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  type          TransactionType
+  amount        Decimal?        @db.Decimal(19, 4)
+  accountId     String?
+  account       Account?        @relation("BookmarkAccountFrom", fields: [accountId], references: [id], onDelete: SetNull)
+  toAccountId   String?
+  toAccount     Account?        @relation("BookmarkAccountTo", fields: [toAccountId], references: [id], onDelete: SetNull)
+  categoryId    String?
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategoryId String?
+  subcategory   Subcategory?    @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  note          String?
+  description   String?
+  fee           Decimal?        @db.Decimal(19, 4)
+  sortOrder     Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([userId])
+}

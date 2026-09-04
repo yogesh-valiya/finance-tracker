@@ -16,6 +16,7 @@ COPY . .
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+RUN rm -rf .next
 RUN npm run build
 
 # Runner stage

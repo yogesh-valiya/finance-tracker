@@ -65,6 +65,10 @@ jobs:
             git checkout "$CURRENT_BRANCH"
             git reset --hard "origin/$CURRENT_BRANCH"
 
+            # Clean untracked stale artifacts (e.g. old .next build cache on host)
+            echo "==> Cleaning stale build cache on host..."
+            rm -rf .next
+
             # 3. Verify .env configuration
             if [ ! -f .env ]; then
               if [ -f .env.example ]; then

@@ -340,6 +340,75 @@ If accessing directly via `http://<SERVER_IP>:3000` without a domain name (for i
 
 ---
 
+## Automated Deployment via GitHub Actions (CI/CD)
+
+The repository includes a ready-to-use GitHub Action workflow ([`.github/workflows/deploy.yml`](file:///.github/workflows/deploy.yml)) that automatically connects to your Linux server via SSH using your private key whenever you push changes to `master` (or click **Run workflow** manually).
+
+### 1. Configure GitHub Repository Secrets
+
+In your GitHub repository, go to **Settings** > **Secrets and variables** > **Actions** > **New repository secret**, and add the following secrets:
+
+| Secret Name | Description | Example |
+|---|---|---|
+| `SSH_HOST` | Your server's public IP address or domain | `123.45.67.89` or `vps.yourdomain.com` |
+| `SSH_USER` | The Linux user to log in as | `ubuntu` or `root` |
+| `SSH_KEY` | The **entire contents** of your private SSH key | `-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----` |
+| `SSH_PORT` *(Optional)* | SSH port (defaults to 22 if omitted) | `22` |
+| `DEPLOY_PATH` *(Optional)* | Absolute path to the repository on your server | `/home/ubuntu/finance-tracker-2` |
+
+> [!TIP]
+> **To copy your private key on your local machine:**
+> ```bash
+> cat ~/.ssh/id_ed25519 # or ~/.ssh/id_rsa
+> ```
+> Copy the complete block including `-----BEGIN ... PRIVATE KEY-----` and `-----END ... PRIVATE KEY-----`.
+
+---
+
+### 2. Server Prerequisites
+
+On your target server, ensure:
+
+1. **Your public key is in `~/.ssh/authorized_keys`:**
+   ```bash
+   mkdir -p ~/.ssh && chmod 700 ~/.ssh
+   echo "ssh-ed25519 AAAAC3NzaC... user@laptop" >> ~/.ssh/authorized_keys
+   chmod 600 ~/.ssh/authorized_keys
+   ```
+
+2. **Docker permissions (if not deploying as `root`):**
+   Add your deployment user to the `docker` group so `docker compose` can run without password prompts:
+   ```bash
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+
+3. **Initial Clone & `.env` Setup on Server:**
+   ```bash
+   git clone https://github.com/<your-username>/<your-repo>.git ~/finance-tracker-2
+   cd ~/finance-tracker-2
+   cp .env.example .env
+   # Edit .env and enter your production credentials (Firebase, database, etc.)
+   nano .env
+   ```
+
+---
+
+### 3. How the Workflow Operates
+
+When triggered, the deployment workflow:
+1. Authenticates securely via SSH using your private key.
+2. Changes to `DEPLOY_PATH` and runs `git fetch` & `git reset --hard` to synchronize with the latest commit.
+3. Automatically detects Docker Compose:
+   - Starts and verifies the PostgreSQL container.
+   - Rebuilds the Next.js standalone container (`docker compose build app`).
+   - Restarts the app container with zero downtime.
+   - Automatically synchronizes your database schema via `prisma db push`.
+   - Prunes dangling Docker images to keep server disk space clean.
+4. If Docker is not found, it gracefully falls back to `npm ci`, `npx prisma db push`, `npm run build`, and `pm2 reload`.
+
+---
+
 ## Available Scripts
 
 | Command | Description |

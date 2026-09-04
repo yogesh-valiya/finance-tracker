@@ -25,6 +25,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       DATABASE_URL: "postgresql://postgres:postgrespassword@db:5432/financetracker?schema=public"
       NODE_ENV: production

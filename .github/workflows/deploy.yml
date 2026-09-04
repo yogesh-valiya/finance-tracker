@@ -1,0 +1,99 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Remote Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Remote Deployment via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST || secrets.HOST }}
+          username: ${{ secrets.SSH_USER || secrets.USER }}
+          key: ${{ secrets.SSH_KEY || secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE || '' }}
+          script_stop: true
+          script: |
+            # 1. Determine Target Deployment Directory
+            DEPLOY_DIR="${{ secrets.DEPLOY_PATH || secrets.TARGET_DIR || '~/finance-tracker-2' }}"
+            eval DEPLOY_DIR="$DEPLOY_DIR"
+
+            echo "=========================================="
+            echo "==> Deploying Finance Tracker to: $DEPLOY_DIR"
+            echo "=========================================="
+
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              echo "Directory $DEPLOY_DIR does not exist. Creating and cloning repository..."
+              mkdir -p "$DEPLOY_DIR"
+              git clone https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+            fi
+
+            cd "$DEPLOY_DIR"
+
+            # 2. Fetch & Pull Latest Changes
+            echo "==> Fetching latest changes from Git..."
+            git fetch --all
+            CURRENT_BRANCH="${{ github.ref_name }}"
+            if [ -z "$CURRENT_BRANCH" ]; then
+              CURRENT_BRANCH="master"
+            fi
+            git checkout "$CURRENT_BRANCH"
+            git reset --hard "origin/$CURRENT_BRANCH"
+
+            # 3. Verify .env configuration
+            if [ ! -f .env ]; then
+              if [ -f .env.example ]; then
+                echo "==> Warning: .env not found. Creating from .env.example (please configure your secrets)..."
+                cp .env.example .env
+              else
+                echo "==> Error: .env file missing in $DEPLOY_DIR"
+                exit 1
+              fi
+            fi
+
+            # 4. Deploy using Docker Compose (Recommended) or PM2/Node
+            if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+              echo "==> Docker Compose detected. Starting container deployment..."
+
+              # Ensure database container is running and healthy
+              docker compose up -d db
+
+              # Build application image with latest code
+              docker compose build app
+
+              # Recreate application container
+              docker compose up -d app
+
+              # Apply database schema updates
+              echo "==> Synchronizing database schema with Prisma..."
+              docker compose exec -T app npx prisma db push --accept-data-loss
+
+              # Clean up old unused images to conserve server disk space
+              echo "==> Pruning dangling docker images..."
+              docker image prune -f
+
+              echo "==> Docker deployment completed successfully!"
+            else
+              echo "==> Deploying with Node.js and PM2..."
+              npm ci
+              npx prisma generate
+              npx prisma db push --accept-data-loss
+              npm run build
+
+              if command -v pm2 &> /dev/null; then
+                pm2 reload finance-tracker || pm2 start npm --name "finance-tracker" -- start
+                pm2 save
+              fi
+              echo "==> Node/PM2 deployment completed successfully!"
+            fi
+
+            echo "==> Deployment finished at $(date)!"

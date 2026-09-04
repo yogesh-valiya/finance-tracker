@@ -3,14 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CategoryBreakdownItem } from "@/app/api/analytics/categories/route";
+import { CategoryBreakdownItem, AccountBreakdownItem } from "@/app/api/analytics/categories/route";
 import { DonutChart, CATEGORY_COLORS } from "@/components/analytics/donut-chart";
 import { TrendChart, TrendPoint } from "@/components/analytics/trend-chart";
 import { TransactionFormDialog, EditableTransaction } from "@/components/transaction/transaction-form-dialog";
 import { CategoryWithSubs } from "@/components/transaction/category-selector";
 import { Account } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -35,12 +35,14 @@ import {
   ArrowUpRight,
   RotateCcw,
   ArrowUpDown,
-  Filter,
   X,
   Loader2,
   Receipt,
-  Layers,
   Calendar,
+  Wallet,
+  CreditCard,
+  Landmark,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +53,18 @@ const SORT_LABELS: Record<string, string> = {
   date_asc: "Oldest First",
   amount_desc: "Price: High to Low",
   amount_asc: "Price: Low to High",
+};
+
+type RangePreset = "monthly" | "annually" | "weekly" | "biweekly" | "last2months" | "last3months" | "custom";
+
+const RANGE_PRESET_LABELS: Record<RangePreset, string> = {
+  monthly: "Monthly",
+  annually: "Annually",
+  weekly: "Weekly",
+  biweekly: "Bi-weekly",
+  last2months: "Last 2 Mo.",
+  last3months: "Last 3 Mo.",
+  custom: "Custom",
 };
 
 interface TransactionItem {
@@ -70,34 +84,71 @@ interface TransactionItem {
   subcategory?: { id: string; name: string } | null;
 }
 
+function formatDateISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function getAccountGroupIcon(group: string) {
+  switch (group?.toUpperCase()) {
+    case "BANK":
+      return <Landmark className="size-3.5 text-blue-500 shrink-0" />;
+    case "CREDIT_CARD":
+      return <CreditCard className="size-3.5 text-purple-500 shrink-0" />;
+    case "CASH":
+      return <Wallet className="size-3.5 text-emerald-500 shrink-0" />;
+    case "INVESTMENT":
+      return <TrendingUp className="size-3.5 text-amber-500 shrink-0" />;
+    default:
+      return <Receipt className="size-3.5 text-muted-foreground shrink-0" />;
+  }
+}
+
 function StatsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Read URL Params or Defaults
   const urlType = searchParams.get("type") === "INCOME" ? "INCOME" : "EXPENSE";
-  const urlGranularity = (searchParams.get("granularity") as "monthly" | "annually" | "weekly" | "custom") || "monthly";
+  const urlRange = (searchParams.get("range") as RangePreset) ||
+    (searchParams.get("startDate") && searchParams.get("endDate")
+      ? "custom"
+      : searchParams.get("granularity") === "annually"
+      ? "annually"
+      : searchParams.get("granularity") === "weekly"
+      ? "weekly"
+      : "monthly");
+
+  const urlTrendGranularity = (searchParams.get("trendGranularity") as "daily" | "weekly" | "monthly") || "daily";
   const urlYear = parseInt(searchParams.get("year") || new Date().getFullYear().toString(), 10);
   const urlMonth = parseInt(searchParams.get("month") || (new Date().getMonth() + 1).toString(), 10);
-  const urlStartMonth = searchParams.get("startMonth") ? parseInt(searchParams.get("startMonth")!, 10) : null;
-  const urlEndMonth = searchParams.get("endMonth") ? parseInt(searchParams.get("endMonth")!, 10) : null;
   const urlStartDate = searchParams.get("startDate") || null;
   const urlEndDate = searchParams.get("endDate") || null;
-  const urlCategory = searchParams.get("category") || null;
-  const urlSubcategory = searchParams.get("subcategory") || null;
+
+  const urlCategoryParam = searchParams.get("categoryIds") || searchParams.get("category");
+  const urlCategories = urlCategoryParam ? urlCategoryParam.split(",").map((s) => s.trim()).filter(Boolean) : [];
+
+  const urlAccountParam = searchParams.get("accountIds") || searchParams.get("account");
+  const urlAccounts = urlAccountParam ? urlAccountParam.split(",").map((s) => s.trim()).filter(Boolean) : [];
+
+  const urlSubParam = searchParams.get("subcategoryNames") || searchParams.get("subcategory");
+  const urlSubcategories = urlSubParam ? urlSubParam.split(",").map((s) => s.trim()).filter(Boolean) : [];
   const urlSort = searchParams.get("sort") || "date_desc";
 
   // State
   const [type, setType] = React.useState<"EXPENSE" | "INCOME">(urlType);
-  const [granularity, setGranularity] = React.useState<"monthly" | "annually" | "weekly" | "custom">(urlGranularity);
+  const [rangePreset, setRangePreset] = React.useState<RangePreset>(urlRange);
+  const [trendGranularity, setTrendGranularity] = React.useState<"daily" | "weekly" | "monthly">(urlTrendGranularity);
   const [year, setYear] = React.useState<number>(urlYear);
   const [month, setMonth] = React.useState<number>(urlMonth);
-  const [startMonth, setStartMonth] = React.useState<number | null>(urlStartMonth);
-  const [endMonth, setEndMonth] = React.useState<number | null>(urlEndMonth);
+  const [weekAnchor, setWeekAnchor] = React.useState<Date>(() => new Date());
   const [startDate, setStartDate] = React.useState<string | null>(urlStartDate);
   const [endDate, setEndDate] = React.useState<string | null>(urlEndDate);
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(urlCategory);
-  const [selectedSubcategoryName, setSelectedSubcategoryName] = React.useState<string | null>(urlSubcategory);
+  const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>(urlCategories);
+  const [selectedAccountIds, setSelectedAccountIds] = React.useState<string[]>(urlAccounts);
+  const [selectedSubcategoryNames, setSelectedSubcategoryNames] = React.useState<string[]>(urlSubcategories);
   const [sort, setSort] = React.useState<string>(urlSort);
 
   // Multi-line and Trend data states
@@ -112,15 +163,19 @@ function StatsContent() {
 
   // Accordion expanded categories
   const [expandedCats, setExpandedCats] = React.useState<Record<string, boolean>>(() => {
-    if (urlCategory) return { [urlCategory]: true };
-    return {};
+    const init: Record<string, boolean> = {};
+    urlCategories.forEach((id) => {
+      init[id] = true;
+    });
+    return init;
   });
 
   // Data States
   const [categories, setCategories] = React.useState<CategoryBreakdownItem[]>([]);
+  const [accounts, setAccounts] = React.useState<AccountBreakdownItem[]>([]);
   const [transactions, setTransactions] = React.useState<TransactionItem[]>([]);
-  const [selectedCategoryMeta, setSelectedCategoryMeta] = React.useState<{ id: string; name: string; emoji: string } | null>(null);
   const [currentTotal, setCurrentTotal] = React.useState(0);
+  const [filteredTotal, setFilteredTotal] = React.useState(0);
   const [priorTotal, setPriorTotal] = React.useState(0);
   const [percentageChange, setPercentageChange] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -152,49 +207,160 @@ function StatsContent() {
     loadPrerequisites();
   }, []);
 
+  // Compute Active Dates & Period Label dynamically
+  const periodInfo = React.useMemo(() => {
+    if (rangePreset === "monthly") {
+      return {
+        label: `${MONTH_NAMES[month - 1]} ${year}`,
+        granularityParam: "monthly",
+        yearParam: year,
+        monthParam: month,
+        startDateParam: null,
+        endDateParam: null,
+        startMonthParam: null,
+        endMonthParam: null,
+      };
+    } else if (rangePreset === "annually") {
+      return {
+        label: `${year}`,
+        granularityParam: "annually",
+        yearParam: year,
+        monthParam: 1,
+        startDateParam: null,
+        endDateParam: null,
+        startMonthParam: null,
+        endMonthParam: null,
+      };
+    } else if (rangePreset === "weekly") {
+      const endD = new Date(weekAnchor);
+      const startD = new Date(weekAnchor);
+      startD.setDate(startD.getDate() - 6);
+      const sDay = startD.getDate();
+      const sM = MONTH_NAMES[startD.getMonth()];
+      const eDay = endD.getDate();
+      const eM = MONTH_NAMES[endD.getMonth()];
+      const y = endD.getFullYear();
+      const label = sM === eM ? `${sDay} – ${eDay} ${eM} ${y}` : `${sDay} ${sM} – ${eDay} ${eM} ${y}`;
+      return {
+        label,
+        granularityParam: "custom",
+        yearParam: y,
+        monthParam: endD.getMonth() + 1,
+        startDateParam: formatDateISO(startD),
+        endDateParam: formatDateISO(endD),
+        startMonthParam: null,
+        endMonthParam: null,
+      };
+    } else if (rangePreset === "biweekly") {
+      const endD = new Date(weekAnchor);
+      const startD = new Date(weekAnchor);
+      startD.setDate(startD.getDate() - 13);
+      const sDay = startD.getDate();
+      const sM = MONTH_NAMES[startD.getMonth()];
+      const eDay = endD.getDate();
+      const eM = MONTH_NAMES[endD.getMonth()];
+      const y = endD.getFullYear();
+      const label = sM === eM ? `${sDay} – ${eDay} ${eM} ${y}` : `${sDay} ${sM} – ${eDay} ${eM} ${y}`;
+      return {
+        label,
+        granularityParam: "custom",
+        yearParam: y,
+        monthParam: endD.getMonth() + 1,
+        startDateParam: formatDateISO(startD),
+        endDateParam: formatDateISO(endD),
+        startMonthParam: null,
+        endMonthParam: null,
+      };
+    } else if (rangePreset === "last2months") {
+      const sM = month === 1 ? 12 : month - 1;
+      const sY = month === 1 ? year - 1 : year;
+      const label = sY === year ? `${MONTH_NAMES[sM - 1]} – ${MONTH_NAMES[month - 1]} ${year}` : `${MONTH_NAMES[sM - 1]} '${sY % 100} – ${MONTH_NAMES[month - 1]} '${year % 100}`;
+      return {
+        label,
+        granularityParam: "custom",
+        yearParam: year,
+        monthParam: month,
+        startDateParam: null,
+        endDateParam: null,
+        startMonthParam: sM,
+        endMonthParam: month,
+      };
+    } else if (rangePreset === "last3months") {
+      let sM = month - 2;
+      let sY = year;
+      if (sM < 1) {
+        sM += 12;
+        sY -= 1;
+      }
+      const label = sY === year ? `${MONTH_NAMES[sM - 1]} – ${MONTH_NAMES[month - 1]} ${year}` : `${MONTH_NAMES[sM - 1]} '${sY % 100} – ${MONTH_NAMES[month - 1]} '${year % 100}`;
+      return {
+        label,
+        granularityParam: "custom",
+        yearParam: year,
+        monthParam: month,
+        startDateParam: null,
+        endDateParam: null,
+        startMonthParam: sM,
+        endMonthParam: month,
+      };
+    } else {
+      // Custom Range
+      const label = startDate && endDate ? `${startDate} – ${endDate}` : "Pick Dates";
+      return {
+        label,
+        granularityParam: "custom",
+        yearParam: year,
+        monthParam: month,
+        startDateParam: startDate,
+        endDateParam: endDate,
+        startMonthParam: null,
+        endMonthParam: null,
+      };
+    }
+  }, [rangePreset, year, month, weekAnchor, startDate, endDate]);
+
   // Synchronize state with URL parameters
   const updateUrl = React.useCallback(
     (newParams: {
       type?: "EXPENSE" | "INCOME";
-      granularity?: "monthly" | "annually" | "weekly" | "custom";
+      range?: RangePreset;
+      trendGranularity?: "daily" | "weekly" | "monthly";
       year?: number;
       month?: number;
-      startMonth?: number | null;
-      endMonth?: number | null;
       startDate?: string | null;
       endDate?: string | null;
-      category?: string | null;
-      subcategory?: string | null;
+      categoryIds?: string[];
+      accountIds?: string[];
+      subcategories?: string[];
       sort?: string;
     }) => {
       const p = new URLSearchParams();
       const nextType = newParams.type ?? type;
-      const nextGran = newParams.granularity ?? granularity;
+      const nextRange = newParams.range ?? rangePreset;
+      const nextTrendGran = newParams.trendGranularity ?? trendGranularity;
       const nextYear = newParams.year ?? year;
       const nextMonth = newParams.month ?? month;
-      const nextStartMonth = newParams.startMonth !== undefined ? newParams.startMonth : startMonth;
-      const nextEndMonth = newParams.endMonth !== undefined ? newParams.endMonth : endMonth;
       const nextStartDate = newParams.startDate !== undefined ? newParams.startDate : startDate;
       const nextEndDate = newParams.endDate !== undefined ? newParams.endDate : endDate;
-      const nextCat = newParams.category !== undefined ? newParams.category : selectedCategoryId;
-      const nextSub = newParams.subcategory !== undefined ? newParams.subcategory : selectedSubcategoryName;
+      const nextCats = newParams.categoryIds ?? selectedCategoryIds;
+      const nextAccs = newParams.accountIds ?? selectedAccountIds;
+      const nextSubs = newParams.subcategories !== undefined ? newParams.subcategories : selectedSubcategoryNames;
       const nextSort = newParams.sort ?? sort;
 
       p.set("type", nextType);
-      p.set("granularity", nextGran);
+      p.set("range", nextRange);
+      p.set("trendGranularity", nextTrendGran);
       p.set("year", nextYear.toString());
       p.set("month", nextMonth.toString());
 
       if (nextStartDate && nextEndDate) {
         p.set("startDate", nextStartDate);
         p.set("endDate", nextEndDate);
-      } else if (nextStartMonth && nextEndMonth) {
-        p.set("startMonth", nextStartMonth.toString());
-        p.set("endMonth", nextEndMonth.toString());
       }
 
-      if (nextCat) p.set("category", nextCat);
-      if (nextSub) p.set("subcategory", nextSub);
+      if (nextCats.length > 0) p.set("categoryIds", nextCats.join(","));
+      if (nextAccs.length > 0) p.set("accountIds", nextAccs.join(","));
+      if (nextSubs.length > 0) p.set("subcategoryNames", nextSubs.join(","));
       if (nextSort && nextSort !== "date_desc") p.set("sort", nextSort);
 
       const newUrl = `/stats?${p.toString()}`;
@@ -203,7 +369,7 @@ function StatsContent() {
       }
       router.replace(newUrl, { scroll: false });
     },
-    [router, type, granularity, year, month, startMonth, endMonth, startDate, endDate, selectedCategoryId, selectedSubcategoryName, sort]
+    [router, type, rangePreset, trendGranularity, year, month, startDate, endDate, selectedCategoryIds, selectedAccountIds, selectedSubcategoryNames, sort]
   );
 
   // Fetch Analytics Data
@@ -213,58 +379,59 @@ function StatsContent() {
       const tzOffset = new Date().getTimezoneOffset();
       const p = new URLSearchParams({
         type,
-        granularity,
-        year: year.toString(),
-        month: month.toString(),
+        granularity: periodInfo.granularityParam,
+        trendGranularity,
+        year: periodInfo.yearParam.toString(),
+        month: periodInfo.monthParam.toString(),
         tzOffset: tzOffset.toString(),
         sort,
       });
 
-      if (startDate && endDate) {
-        p.set("startDate", startDate);
-        p.set("endDate", endDate);
-      } else if (startMonth && endMonth) {
-        p.set("startMonth", startMonth.toString());
-        p.set("endMonth", endMonth.toString());
+      if (periodInfo.startDateParam && periodInfo.endDateParam) {
+        p.set("startDate", periodInfo.startDateParam);
+        p.set("endDate", periodInfo.endDateParam);
+      } else if (periodInfo.startMonthParam && periodInfo.endMonthParam) {
+        p.set("startMonth", periodInfo.startMonthParam.toString());
+        p.set("endMonth", periodInfo.endMonthParam.toString());
       }
 
-      if (selectedCategoryId) {
-        p.set("categoryId", selectedCategoryId);
+      if (selectedCategoryIds.length > 0) {
+        p.set("categoryIds", selectedCategoryIds.join(","));
       }
-      if (selectedSubcategoryName) {
-        p.set("subcategoryName", selectedSubcategoryName);
+      if (selectedAccountIds.length > 0) {
+        p.set("accountIds", selectedAccountIds.join(","));
+      }
+      if (selectedSubcategoryNames.length > 0) {
+        p.set("subcategoryNames", selectedSubcategoryNames.join(","));
       }
 
       const res = await fetch(`/api/analytics/categories?${p.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setCategories(data.categories || []);
+        setAccounts(data.accounts || []);
         setTrendPoints(data.trend?.points || data.annualTrend || []);
         setSubSeries(data.trend?.subSeries || []);
         setTransactions(data.transactions || []);
         setCurrentTotal(data.currentTotal || 0);
+        setFilteredTotal(data.filteredTotal || data.currentTotal || 0);
         setPriorTotal(data.priorTotal || 0);
         setPercentageChange(data.percentageChange || 0);
-        setSelectedCategoryMeta(data.selectedCategory || null);
       }
     } catch (err) {
       console.error("Failed to load analytics:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [type, granularity, year, month, startMonth, endMonth, startDate, endDate, selectedCategoryId, selectedSubcategoryName, sort]);
+  }, [type, periodInfo, trendGranularity, selectedCategoryIds, selectedAccountIds, selectedSubcategoryNames, sort]);
 
   React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Period Navigation
+  // Smart Period Navigation Prev / Next
   function handlePrevPeriod() {
-    if (granularity === "annually") {
-      const nextY = year - 1;
-      setYear(nextY);
-      updateUrl({ year: nextY });
-    } else {
+    if (rangePreset === "monthly") {
       let nextM = month - 1;
       let nextY = year;
       if (nextM < 1) {
@@ -273,18 +440,50 @@ function StatsContent() {
       }
       setYear(nextY);
       setMonth(nextM);
-      setStartMonth(null);
-      setEndMonth(null);
-      updateUrl({ year: nextY, month: nextM, startMonth: null, endMonth: null });
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "annually") {
+      const nextY = year - 1;
+      setYear(nextY);
+      updateUrl({ year: nextY });
+    } else if (rangePreset === "weekly") {
+      setWeekAnchor((prev) => {
+        const next = new Date(prev);
+        next.setDate(next.getDate() - 7);
+        return next;
+      });
+    } else if (rangePreset === "biweekly") {
+      setWeekAnchor((prev) => {
+        const next = new Date(prev);
+        next.setDate(next.getDate() - 14);
+        return next;
+      });
+    } else if (rangePreset === "last2months") {
+      let nextM = month - 2;
+      let nextY = year;
+      if (nextM < 1) {
+        nextM += 12;
+        nextY -= 1;
+      }
+      setYear(nextY);
+      setMonth(nextM);
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "last3months") {
+      let nextM = month - 3;
+      let nextY = year;
+      if (nextM < 1) {
+        nextM += 12;
+        nextY -= 1;
+      }
+      setYear(nextY);
+      setMonth(nextM);
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "custom") {
+      setCustomDateOpen(true);
     }
   }
 
   function handleNextPeriod() {
-    if (granularity === "annually") {
-      const nextY = year + 1;
-      setYear(nextY);
-      updateUrl({ year: nextY });
-    } else {
+    if (rangePreset === "monthly") {
       let nextM = month + 1;
       let nextY = year;
       if (nextM > 12) {
@@ -293,143 +492,164 @@ function StatsContent() {
       }
       setYear(nextY);
       setMonth(nextM);
-      setStartMonth(null);
-      setEndMonth(null);
-      updateUrl({ year: nextY, month: nextM, startMonth: null, endMonth: null });
-    }
-  }
-
-  // Range Selection Callback from TrendChart (drag or 2-click)
-  function handleSelectRange(sMonth: number, eMonth: number) {
-    const s = Math.min(sMonth, eMonth);
-    const e = Math.max(sMonth, eMonth);
-    setStartMonth(s);
-    setEndMonth(e);
-    updateUrl({ startMonth: s, endMonth: e });
-  }
-
-  // Month Click on TrendChart: Click 1 = start, Click 2 = complete range filter
-  function handleSelectMonth(mIdx: number) {
-    if (!startMonth || (startMonth && endMonth && startMonth !== endMonth)) {
-      // First click: start new range at mIdx
-      setStartMonth(mIdx);
-      setEndMonth(mIdx);
-      setMonth(mIdx);
-      updateUrl({ month: mIdx, startMonth: mIdx, endMonth: mIdx });
-    } else {
-      // Second click: complete range from startMonth to mIdx
-      const s = Math.min(startMonth, mIdx);
-      const e = Math.max(startMonth, mIdx);
-      setStartMonth(s);
-      setEndMonth(e);
-      updateUrl({ startMonth: s, endMonth: e });
-    }
-  }
-
-  // Category Double-Click in Pie Chart adds category to filter
-  function handleDoubleClickCategory(catId: string) {
-    if (selectedCategoryId === catId) {
-      // Double clicking already filtered category clears it
-      setSelectedCategoryId(null);
-      setSelectedSubcategoryName(null);
-      updateUrl({ category: null, subcategory: null });
-    } else {
-      // Double clicking category locks/adds it into filter
-      setSelectedCategoryId(catId);
-      setSelectedSubcategoryName(null);
-      setExpandedCats((prev) => ({ ...prev, [catId]: true }));
-      updateUrl({ category: catId, subcategory: null });
-    }
-  }
-
-  // Category Selection in Ranked List
-  function handleSelectCategory(catId: string | null) {
-    if (selectedCategoryId === catId) {
-      // Toggle off
-      setSelectedCategoryId(null);
-      setSelectedSubcategoryName(null);
-      updateUrl({ category: null, subcategory: null });
-    } else {
-      setSelectedCategoryId(catId);
-      setSelectedSubcategoryName(null);
-      if (catId) {
-        setExpandedCats((prev) => ({ ...prev, [catId]: true }));
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "annually") {
+      const nextY = year + 1;
+      setYear(nextY);
+      updateUrl({ year: nextY });
+    } else if (rangePreset === "weekly") {
+      setWeekAnchor((prev) => {
+        const next = new Date(prev);
+        next.setDate(next.getDate() + 7);
+        return next;
+      });
+    } else if (rangePreset === "biweekly") {
+      setWeekAnchor((prev) => {
+        const next = new Date(prev);
+        next.setDate(next.getDate() + 14);
+        return next;
+      });
+    } else if (rangePreset === "last2months") {
+      let nextM = month + 2;
+      let nextY = year;
+      if (nextM > 12) {
+        nextM -= 12;
+        nextY += 1;
       }
-      updateUrl({ category: catId, subcategory: null });
+      setYear(nextY);
+      setMonth(nextM);
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "last3months") {
+      let nextM = month + 3;
+      let nextY = year;
+      if (nextM > 12) {
+        nextM -= 12;
+        nextY += 1;
+      }
+      setYear(nextY);
+      setMonth(nextM);
+      updateUrl({ year: nextY, month: nextM });
+    } else if (rangePreset === "custom") {
+      setCustomDateOpen(true);
     }
   }
 
-  // Accordion Toggle without clearing category
-  function toggleCategoryAccordion(catId: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    setExpandedCats((prev) => ({
-      ...prev,
-      [catId]: !prev[catId],
-    }));
+  // Range Preset Change Handler
+  function handleRangePresetChange(newPreset: RangePreset) {
+    setRangePreset(newPreset);
+    if (newPreset === "custom") {
+      setCustomDateOpen(true);
+      return;
+    }
+    // Set smart trend resolution based on range
+    if (newPreset === "annually" || newPreset === "last2months" || newPreset === "last3months") {
+      setTrendGranularity("monthly");
+      updateUrl({ range: newPreset, trendGranularity: "monthly", startDate: null, endDate: null });
+    } else {
+      setTrendGranularity("daily");
+      updateUrl({ range: newPreset, trendGranularity: "daily", startDate: null, endDate: null });
+    }
   }
 
-  // Subcategory Selection
+  // Multi-Select Category Handler: toggles category without clearing others!
+  function handleToggleCategory(catId: string) {
+    setSelectedCategoryIds((prev) => {
+      const exists = prev.includes(catId);
+      const next = exists ? prev.filter((id) => id !== catId) : [...prev, catId];
+      if (!exists) {
+        setExpandedCats((exp) => ({ ...exp, [catId]: true }));
+      }
+      updateUrl({ categoryIds: next });
+      return next;
+    });
+  }
+
+  // Multi-Select Account Handler: toggles account without clearing others!
+  function handleToggleAccount(accId: string) {
+    setSelectedAccountIds((prev) => {
+      const exists = prev.includes(accId);
+      const next = exists ? prev.filter((id) => id !== accId) : [...prev, accId];
+      updateUrl({ accountIds: next });
+      return next;
+    });
+  }
+
+  // Subcategory Selection inside Expanded Category: Multi-select supported!
   function handleSelectSubcategory(catId: string, subName: string | null, e?: React.MouseEvent) {
     if (e) e.stopPropagation();
-    setSelectedCategoryId(catId);
-    setSelectedSubcategoryName(subName);
-    updateUrl({ category: catId, subcategory: subName });
+    if (subName === null) {
+      // Clear subcategories under this category
+      const targetCat = categories.find((c) => c.id === catId);
+      const subNamesToRemove = targetCat ? targetCat.subcategories.map((s) => s.name) : [];
+      setSelectedSubcategoryNames((prev) => {
+        const next = prev.filter((name) => !subNamesToRemove.includes(name));
+        updateUrl({ subcategories: next });
+        return next;
+      });
+      if (catId && !selectedCategoryIds.includes(catId)) {
+        setSelectedCategoryIds((prev) => {
+          const next = [...prev, catId];
+          updateUrl({ categoryIds: next });
+          return next;
+        });
+      }
+    } else {
+      if (catId && !selectedCategoryIds.includes(catId)) {
+        setSelectedCategoryIds((prev) => {
+          const next = [...prev, catId];
+          updateUrl({ categoryIds: next });
+          return next;
+        });
+      }
+      setSelectedSubcategoryNames((prev) => {
+        const exists = prev.includes(subName);
+        const next = exists ? prev.filter((s) => s !== subName) : [...prev, subName];
+        updateUrl({ subcategories: next });
+        return next;
+      });
+    }
+  }
+
+  // Category Accordion Toggle (Expand / Collapse)
+  function toggleCategoryAccordion(catId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setExpandedCats((prev) => ({ ...prev, [catId]: !prev[catId] }));
   }
 
   // Reset all filters
   function handleResetFilters() {
-    setSelectedCategoryId(null);
-    setSelectedSubcategoryName(null);
-    setStartMonth(null);
-    setEndMonth(null);
+    setSelectedCategoryIds([]);
+    setSelectedAccountIds([]);
+    setSelectedSubcategoryNames([]);
     setStartDate(null);
     setEndDate(null);
     setTempStartDate("");
     setTempEndDate("");
-    setGranularity("monthly");
     setSort("date_desc");
     updateUrl({
-      category: null,
-      subcategory: null,
-      startMonth: null,
-      endMonth: null,
+      categoryIds: [],
+      accountIds: [],
+      subcategories: [],
       startDate: null,
       endDate: null,
-      granularity: "monthly",
       sort: "date_desc",
     });
   }
 
-  // Format currency helper
   const formatCurrency = (val: number) => {
-    return `₹${val.toLocaleString("en-IN", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    return `₹${val.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const periodLabel =
-    startDate && endDate
-      ? `${startDate} – ${endDate}`
-      : startMonth && endMonth
-      ? startMonth === endMonth
-        ? `${MONTH_NAMES[startMonth - 1]} ${year}`
-        : `${MONTH_NAMES[Math.min(startMonth, endMonth) - 1]} – ${MONTH_NAMES[Math.max(startMonth, endMonth) - 1]} ${year}`
-      : granularity === "annually"
-      ? year.toString()
-      : granularity === "weekly"
-      ? `Week of ${MONTH_NAMES[month - 1]} ${year}`
-      : `${MONTH_NAMES[month - 1]} ${year}`;
-
-  const hasActiveFilters = Boolean(
-    selectedCategoryId || selectedSubcategoryName || (startMonth && endMonth) || (startDate && endDate) || sort !== "date_desc"
-  );
-
-  const activeCategory = categories.find((c) => c.id === selectedCategoryId);
+  const hasActiveFilters =
+    selectedCategoryIds.length > 0 ||
+    selectedAccountIds.length > 0 ||
+    selectedSubcategoryNames.length > 0 ||
+    Boolean(startDate && endDate) ||
+    sort !== "date_desc";
 
   return (
     <div className="flex flex-col gap-5 pb-16 md:pb-6">
-      {/* 1. Header & Period Navigator */}
+      {/* 1. Header: Title + Unified Range Selector & Smart Period Navigator */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -441,54 +661,58 @@ function StatsContent() {
           </p>
         </div>
 
-        {/* Period Navigator */}
-        <div className="flex items-center gap-2">
-          {/* Granularity Picker */}
-          <div className="flex p-0.5 rounded-lg bg-muted/60 border border-border text-xs gap-0.5">
-            {(["monthly", "annually", "weekly"] as const).map((g) => (
-              <Button
-                key={g}
-                type="button"
-                variant={granularity === g && !startDate ? "default" : "ghost"}
-                size="xs"
-                onClick={() => {
-                  setGranularity(g);
-                  setStartMonth(null);
-                  setEndMonth(null);
-                  setStartDate(null);
-                  setEndDate(null);
-                  updateUrl({ granularity: g, startMonth: null, endMonth: null, startDate: null, endDate: null });
-                }}
-                className={cn(
-                  "capitalize font-medium text-xs h-7 px-2.5",
-                  (granularity !== g || Boolean(startDate)) && "text-muted-foreground"
-                )}
-              >
-                {g}
-              </Button>
-            ))}
-          </div>
+        {/* Range & Smart Period Controls */}
+        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+          {/* Unified Range Selector Dropdown */}
+          <Select value={rangePreset} onValueChange={(val) => handleRangePresetChange(val as RangePreset)}>
+            <SelectTrigger className="h-8 text-xs bg-card border-border font-medium w-[100px] sm:w-[135px] cursor-pointer shadow-2xs">
+              <span className="hidden sm:inline text-muted-foreground mr-1 shrink-0">Range:</span>
+              <span className="font-semibold truncate">{RANGE_PRESET_LABELS[rangePreset] || "Monthly"}</span>
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="monthly" className="text-xs">
+                Monthly
+              </SelectItem>
+              <SelectItem value="annually" className="text-xs">
+                Annually
+              </SelectItem>
+              <SelectItem value="weekly" className="text-xs">
+                Weekly
+              </SelectItem>
+              <SelectItem value="biweekly" className="text-xs">
+                Bi-weekly
+              </SelectItem>
+              <SelectItem value="last2months" className="text-xs">
+                Last 2 Months
+              </SelectItem>
+              <SelectItem value="last3months" className="text-xs">
+                Last 3 Months
+              </SelectItem>
+              <SelectItem value="custom" className="text-xs">
+                Custom Range...
+              </SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div className="flex items-center bg-card border border-border rounded-lg shadow-2xs">
+          {/* Smart Period Navigator: adapts dynamically to the active range preset */}
+          <div className="flex items-center bg-card border border-border rounded-lg shadow-2xs shrink-0">
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={handlePrevPeriod}
-              disabled={Boolean(startDate && endDate)}
-              className="size-8"
+              className="size-8 cursor-pointer"
               title="Previous period"
             >
               <ChevronLeft className="size-4" />
             </Button>
-            <span className="px-3 text-xs font-semibold select-none min-w-[85px] text-center">
-              {periodLabel}
+            <span className="px-2 sm:px-3 text-xs font-semibold select-none min-w-[80px] sm:min-w-[95px] text-center tabular-nums truncate">
+              {periodInfo.label}
             </span>
             <Button
               variant="ghost"
               size="icon-xs"
               onClick={handleNextPeriod}
-              disabled={Boolean(startDate && endDate)}
-              className="size-8"
+              className="size-8 cursor-pointer"
               title="Next period"
             >
               <ChevronRight className="size-4" />
@@ -500,12 +724,12 @@ function StatsContent() {
             <PopoverTrigger
               type="button"
               className={cn(
-                "h-8 gap-1.5 px-2.5 text-xs inline-flex items-center justify-center rounded-md border transition-colors shadow-2xs font-medium cursor-pointer",
-                startDate && endDate
+                "size-8 sm:w-auto sm:px-2.5 sm:gap-1.5 text-xs inline-flex items-center justify-center rounded-md border transition-colors shadow-2xs font-medium cursor-pointer shrink-0",
+                rangePreset === "custom"
                   ? "bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
                   : "border-border bg-card text-foreground hover:bg-muted"
               )}
-              title="Select Custom Date Range"
+              title="Custom Date Range Picker"
             >
               <Calendar className="size-3.5" />
               <span className="hidden sm:inline">Custom</span>
@@ -548,9 +772,9 @@ function StatsContent() {
                     setTempEndDate("");
                     setStartDate(null);
                     setEndDate(null);
-                    setGranularity("monthly");
+                    setRangePreset("monthly");
                     setCustomDateOpen(false);
-                    updateUrl({ startDate: null, endDate: null, granularity: "monthly" });
+                    updateUrl({ startDate: null, endDate: null, range: "monthly" });
                   }}
                   className="text-xs h-7 text-muted-foreground hover:text-foreground"
                 >
@@ -563,16 +787,12 @@ function StatsContent() {
                   onClick={() => {
                     setStartDate(tempStartDate);
                     setEndDate(tempEndDate);
-                    setGranularity("custom");
-                    setStartMonth(null);
-                    setEndMonth(null);
+                    setRangePreset("custom");
                     setCustomDateOpen(false);
                     updateUrl({
-                      granularity: "custom",
+                      range: "custom",
                       startDate: tempStartDate,
                       endDate: tempEndDate,
-                      startMonth: null,
-                      endMonth: null,
                     });
                   }}
                   className="text-xs h-7 px-3"
@@ -585,7 +805,7 @@ function StatsContent() {
         </div>
       </div>
 
-      {/* 2. Top Controls: Expense vs Income Toggle & Active Filter Tags */}
+      {/* 2. Controls & Active Multi-Select Filter Badges */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Expenses vs Income Switcher */}
         <div className="grid grid-cols-2 p-1 rounded-xl bg-muted/40 border border-border max-w-xs select-none gap-1">
@@ -595,9 +815,9 @@ function StatsContent() {
             size="sm"
             onClick={() => {
               setType("EXPENSE");
-              setSelectedCategoryId(null);
-              setSelectedSubcategoryName(null);
-              updateUrl({ type: "EXPENSE", category: null, subcategory: null });
+              setSelectedCategoryIds([]);
+              setSelectedSubcategoryNames([]);
+              updateUrl({ type: "EXPENSE", categoryIds: [], subcategories: [] });
             }}
             className={cn(
               "h-8 text-xs font-semibold",
@@ -612,9 +832,9 @@ function StatsContent() {
             size="sm"
             onClick={() => {
               setType("INCOME");
-              setSelectedCategoryId(null);
-              setSelectedSubcategoryName(null);
-              updateUrl({ type: "INCOME", category: null, subcategory: null });
+              setSelectedCategoryIds([]);
+              setSelectedSubcategoryNames([]);
+              updateUrl({ type: "INCOME", categoryIds: [], subcategories: [] });
             }}
             className={cn(
               "h-8 text-xs font-semibold",
@@ -625,102 +845,72 @@ function StatsContent() {
           </Button>
         </div>
 
-        {/* Active Filter Badges with Reset Option */}
+        {/* Active Multi-Select Filter Badges with Individual & Global Clear */}
         <div className="flex flex-wrap items-center gap-2">
-          {selectedCategoryId && activeCategory && (
-            <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
-              <span>{activeCategory.emoji}</span>
-              <span>{activeCategory.name}</span>
-              <button
-                type="button"
-                onClick={() => handleSelectCategory(null)}
-                className="hover:bg-muted p-0.5 rounded-full"
-                title="Remove category filter"
-              >
-                <X className="size-3" />
-              </button>
-            </Badge>
-          )}
+          {/* Selected Categories Badges */}
+          {selectedCategoryIds.map((catId) => {
+            const cat = categories.find((c) => c.id === catId);
+            return (
+              <Badge key={catId} variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
+                <span>{cat?.emoji || "📁"}</span>
+                <span>{cat?.name || "Category"}</span>
+                <button
+                  type="button"
+                  onClick={() => handleToggleCategory(catId)}
+                  className="hover:bg-muted p-0.5 rounded-full cursor-pointer"
+                  title="Remove category filter"
+                >
+                  <X className="size-3" />
+                </button>
+              </Badge>
+            );
+          })}
 
-          {selectedSubcategoryName && (
-            <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
+          {/* Selected Accounts Badges */}
+          {selectedAccountIds.map((accId) => {
+            const acc = accounts.find((a) => a.id === accId) || allAccounts.find((a) => a.id === accId);
+            return (
+              <Badge key={accId} variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">
+                {getAccountGroupIcon(acc?.group || "")}
+                <span>{acc?.name || "Account"}</span>
+                <button
+                  type="button"
+                  onClick={() => handleToggleAccount(accId)}
+                  className="hover:bg-muted p-0.5 rounded-full cursor-pointer"
+                  title="Remove account filter"
+                >
+                  <X className="size-3" />
+                </button>
+              </Badge>
+            );
+          })}
+
+          {selectedSubcategoryNames.map((subName) => (
+            <Badge key={subName} variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
               <span>›</span>
-              <span>{selectedSubcategoryName}</span>
+              <span>{subName}</span>
               <button
                 type="button"
-                onClick={() => handleSelectSubcategory(selectedCategoryId!, null)}
-                className="hover:bg-muted p-0.5 rounded-full"
+                onClick={() => handleSelectSubcategory("", subName)}
+                className="hover:bg-muted p-0.5 rounded-full cursor-pointer"
                 title="Remove subcategory filter"
               >
                 <X className="size-3" />
               </button>
             </Badge>
-          )}
-
-          {startDate && endDate && (
-            <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
-              <Calendar className="size-3" />
-              <span>
-                {startDate} – {endDate}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setStartDate(null);
-                  setEndDate(null);
-                  setTempStartDate("");
-                  setTempEndDate("");
-                  setGranularity("monthly");
-                  updateUrl({ startDate: null, endDate: null, granularity: "monthly" });
-                }}
-                className="hover:bg-muted p-0.5 rounded-full"
-                title="Remove custom date filter"
-              >
-                <X className="size-3" />
-              </button>
-            </Badge>
-          )}
-
-          {startMonth && endMonth && !startDate && (
-            <Badge variant="secondary" className="text-xs gap-1.5 pl-2 pr-1 py-1">
-              <span>📅</span>
-              <span>
-                {startMonth === endMonth
-                  ? `${MONTH_NAMES[startMonth - 1]} ${year}`
-                  : `${MONTH_NAMES[Math.min(startMonth, endMonth) - 1]} – ${MONTH_NAMES[Math.max(startMonth, endMonth) - 1]} ${year}`}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setStartMonth(null);
-                  setEndMonth(null);
-                  updateUrl({ startMonth: null, endMonth: null });
-                }}
-                className="hover:bg-muted p-0.5 rounded-full"
-                title="Remove range filter"
-              >
-                <X className="size-3" />
-              </button>
-            </Badge>
-          )}
+          ))}
 
           {sort !== "date_desc" && (
             <Badge variant="outline" className="text-xs gap-1.5 pl-2 pr-1 py-1">
               <ArrowUpDown className="size-3 text-muted-foreground" />
-              <span>
-                {sort === "amount_desc"
-                  ? "Price: High to Low"
-                  : sort === "amount_asc"
-                  ? "Price: Low to High"
-                  : "Oldest First"}
-              </span>
+              <span>{SORT_LABELS[sort] || "Sorted"}</span>
               <button
                 type="button"
                 onClick={() => {
                   setSort("date_desc");
                   updateUrl({ sort: "date_desc" });
                 }}
-                className="hover:bg-muted p-0.5 rounded-full"
+                className="hover:bg-muted p-0.5 rounded-full cursor-pointer"
                 title="Reset sort"
               >
                 <X className="size-3" />
@@ -733,7 +923,7 @@ function StatsContent() {
               variant="outline"
               size="xs"
               onClick={handleResetFilters}
-              className="text-xs gap-1 text-muted-foreground hover:text-foreground h-7"
+              className="text-xs gap-1 text-muted-foreground hover:text-foreground h-7 cursor-pointer"
             >
               <RotateCcw className="size-3" />
               Reset filters
@@ -742,10 +932,10 @@ function StatsContent() {
         </div>
       </div>
 
-      {/* 3. Main Dashboard Grid (Charts & Accordion) */}
+      {/* 3. Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left Column (5 cols): Distribution Breakdown & Trend Chart */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
+        {/* Left Column (5 cols): Donut Breakdown & Trend Graph */}
+        <div className="lg:col-span-5 flex flex-col gap-5">
           {/* Distribution Breakdown & Donut Chart */}
           <Card className="border-border">
             <CardHeader className="pb-0 text-center">
@@ -753,7 +943,7 @@ function StatsContent() {
                 Distribution Breakdown
               </CardDescription>
               <CardTitle className="text-2xl font-bold tabular-nums">
-                {formatCurrency(currentTotal)}
+                {formatCurrency(selectedCategoryIds.length > 0 ? filteredTotal : currentTotal)}
               </CardTitle>
               {priorTotal > 0 && (
                 <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-1">
@@ -775,60 +965,40 @@ function StatsContent() {
             <CardContent className="pt-2">
               <DonutChart
                 data={categories}
-                total={currentTotal}
+                total={selectedCategoryIds.length > 0 ? filteredTotal : currentTotal}
                 type={type}
-                selectedCategoryId={selectedCategoryId}
-                onDoubleClickCategory={handleDoubleClickCategory}
+                selectedCategoryIds={selectedCategoryIds}
+                onDoubleClickCategory={handleToggleCategory}
+                onSelectCategory={handleToggleCategory}
               />
             </CardContent>
           </Card>
 
-          {/* Granularity-Aware Trend Graph (with subcategory multi-line toggle) */}
+          {/* Granularity-Aware Trend Graph (Controls Moved into Trend Card Header!) */}
           <Card className="border-border">
-            <CardHeader className="pb-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xs uppercase font-semibold tracking-wider text-muted-foreground">
-                    {granularity === "annually"
-                      ? `12-Month Trend (${year})`
-                      : granularity === "weekly"
-                      ? `Weekly Trend (${periodLabel})`
-                      : granularity === "custom"
-                      ? `Trend (${startDate} – ${endDate})`
-                      : `Monthly Daily Trend (${MONTH_NAMES[month - 1]} ${year})`}
-                  </CardTitle>
-                  <CardDescription className="text-xs font-medium text-foreground">
-                    {activeCategory
-                      ? `${activeCategory.emoji} ${activeCategory.name}${
-                          selectedSubcategoryName ? ` › ${selectedSubcategoryName}` : ""
-                        }`
-                      : `All ${type === "EXPENSE" ? "Expenses" : "Income"}`}
-                  </CardDescription>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  {selectedCategoryId && subSeries.length > 0 && (
-                    <div className="flex p-0.5 rounded-lg bg-muted/60 border border-border text-[10px] gap-0.5">
-                      <Button
-                        type="button"
-                        variant={!showMultiLine ? "default" : "ghost"}
-                        size="xs"
-                        onClick={() => setShowMultiLine(false)}
-                        className="h-5 px-1.5 text-[10px] font-medium"
-                      >
-                        Total
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={showMultiLine ? "default" : "ghost"}
-                        size="xs"
-                        onClick={() => setShowMultiLine(true)}
-                        className="h-5 px-1.5 text-[10px] font-medium"
-                      >
-                        By Subcategory
-                      </Button>
-                    </div>
-                  )}
+            <CardHeader className="pb-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xs uppercase font-semibold tracking-wider text-muted-foreground">
+                      {rangePreset === "annually"
+                        ? `Annual Trend (${periodInfo.label})`
+                        : rangePreset === "weekly"
+                        ? `Weekly Trend (${periodInfo.label})`
+                        : rangePreset === "biweekly"
+                        ? `Bi-weekly Trend (${periodInfo.label})`
+                        : `Trend (${periodInfo.label})`}
+                    </CardTitle>
+                    <CardDescription className="text-xs font-medium text-foreground">
+                      {selectedCategoryIds.length === 1
+                        ? `${categories.find((c) => c.id === selectedCategoryIds[0])?.emoji || ""} ${
+                            categories.find((c) => c.id === selectedCategoryIds[0])?.name || "Category"
+                          }${selectedSubcategoryNames.length > 0 ? ` › ${selectedSubcategoryNames.join(", ")}` : ""}`
+                        : selectedCategoryIds.length > 1
+                        ? `${selectedCategoryIds.length} categories filtered`
+                        : `All ${type === "EXPENSE" ? "Expenses" : "Income"}`}
+                    </CardDescription>
+                  </div>
 
                   <Badge
                     variant={type === "INCOME" ? "default" : "destructive"}
@@ -837,210 +1007,370 @@ function StatsContent() {
                     {type}
                   </Badge>
                 </div>
+
+                {/* Trend Card Resolution & Subcategory Controls */}
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+                  {/* Trend Granularity Switcher Pills (Daily / Weekly / Monthly) */}
+                  <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border text-[10px] gap-0.5">
+                    {(["daily", "weekly", "monthly"] as const).map((g) => (
+                      <Button
+                        key={g}
+                        type="button"
+                        variant={trendGranularity === g ? "default" : "ghost"}
+                        size="xs"
+                        onClick={() => {
+                          setTrendGranularity(g);
+                          updateUrl({ trendGranularity: g });
+                        }}
+                        className={cn(
+                          "h-5 px-2 text-[10px] font-medium capitalize cursor-pointer",
+                          trendGranularity !== g && "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {g}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Subcategory Multi-Line Toggle (if 1 category selected) */}
+                  {selectedCategoryIds.length === 1 && subSeries.length > 0 && (
+                    <div className="flex p-0.5 rounded-lg bg-muted/60 border border-border text-[10px] gap-0.5">
+                      <Button
+                        type="button"
+                        variant={!showMultiLine ? "default" : "ghost"}
+                        size="xs"
+                        onClick={() => setShowMultiLine(false)}
+                        className="h-5 px-1.5 text-[10px] font-medium cursor-pointer"
+                      >
+                        Total
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={showMultiLine ? "default" : "ghost"}
+                        size="xs"
+                        onClick={() => setShowMultiLine(true)}
+                        className="h-5 px-1.5 text-[10px] font-medium cursor-pointer"
+                      >
+                        Subcategories
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <TrendChart
                 data={trendPoints}
-                granularity={granularity}
+                granularity={periodInfo.granularityParam as any}
                 color={type === "INCOME" ? "var(--income)" : "var(--expense)"}
-                activeMonth={month}
-                startMonth={startMonth}
-                endMonth={endMonth}
                 subSeries={subSeries}
                 showMultiLine={showMultiLine}
-                onSelectMonth={handleSelectMonth}
-                onSelectRange={handleSelectRange}
-                onClearRange={() => {
-                  setStartMonth(null);
-                  setEndMonth(null);
-                  updateUrl({ startMonth: null, endMonth: null });
-                }}
               />
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column (7 cols): Ranked Categories Accordion */}
-        <Card className="lg:col-span-7 border-border">
-          <CardHeader className="pb-3 border-b border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-semibold">Ranked Categories</CardTitle>
-                <CardDescription className="text-xs">
-                  Click category to filter • Expand for subcategories
-                </CardDescription>
+        {/* Right Column (7 cols): Ranked Categories & Accounts Breakdown */}
+        <div className="lg:col-span-7 flex flex-col gap-5">
+          {/* Card 1: Ranked Categories Accordion */}
+          <Card className="border-border">
+            <CardHeader className="pb-3 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-semibold">Ranked Categories</CardTitle>
+                  <CardDescription className="text-xs">
+                    Click to filter • Multi-select supported • Expand for subs
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {selectedCategoryIds.length > 0 && (
+                    <Badge variant="default" className="text-[11px] px-1.5 py-0 bg-primary">
+                      {selectedCategoryIds.length} Selected
+                    </Badge>
+                  )}
+                  <Badge variant="secondary" className="text-xs">
+                    {categories.length} Categories
+                  </Badge>
+                </div>
               </div>
-              <Badge variant="secondary" className="text-xs">
-                {categories.length} Categories
-              </Badge>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent className="p-0 divide-y divide-border/60 max-h-[600px] overflow-y-auto">
-            {categories.length === 0 ? (
-              <div className="p-10 text-center text-xs text-muted-foreground">
-                No {type.toLowerCase()} transactions found for this period.
-              </div>
-            ) : (
-              categories.map((cat, index) => {
-                const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
-                const isSelected = selectedCategoryId === cat.id;
-                const isExpanded = expandedCats[cat.id] ?? false;
+            {/* Scrollbar layout shift eliminated with scrollbar-gutter: stable & scrollbar-width: thin */}
+            <CardContent className="p-0 divide-y divide-border/60 max-h-[340px] overflow-y-auto [scrollbar-gutter:stable] [scrollbar-width:thin]">
+              {categories.length === 0 ? (
+                <div className="p-8 text-center text-xs text-muted-foreground">
+                  No {type.toLowerCase()} transactions found for this period.
+                </div>
+              ) : (
+                categories.map((cat, index) => {
+                  const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+                  const isSelected = selectedCategoryIds.includes(cat.id);
+                  const isExpanded = expandedCats[cat.id] ?? false;
 
-                return (
-                  <div key={cat.id} className="flex flex-col">
-                    {/* Category Row */}
-                    <div
-                      onClick={() => handleSelectCategory(cat.id)}
-                      className={cn(
-                        "flex items-center justify-between p-3.5 transition-colors cursor-pointer select-none",
-                        isSelected ? "bg-primary/10 font-semibold" : "hover:bg-muted/30"
-                      )}
-                    >
-                      <div className="flex items-center gap-3 min-w-0 pr-3">
-                        <div
-                          className="size-3 rounded-full shrink-0"
-                          style={{ backgroundColor: color }}
-                        />
-                        <span className="text-base shrink-0">{cat.emoji}</span>
-                        <div className="flex flex-col min-w-0">
-                          <span
+                  return (
+                    <div key={cat.id} className="flex flex-col">
+                      {/* Category Row */}
+                      <div
+                        onClick={() => handleToggleCategory(cat.id)}
+                        className={cn(
+                          "flex items-center justify-between p-3 transition-colors cursor-pointer select-none",
+                          isSelected ? "bg-primary/10 font-semibold" : "hover:bg-muted/30"
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                          <div
                             className={cn(
-                              "text-xs truncate transition-colors",
-                              isSelected ? "font-bold text-primary" : "font-medium text-foreground"
+                              "size-4 rounded flex items-center justify-center border transition-colors shrink-0",
+                              isSelected ? "bg-primary border-primary text-primary-foreground" : "border-border/80 bg-background"
                             )}
                           >
-                            {cat.name}
+                            {isSelected && <Check className="size-3 stroke-[3]" />}
+                          </div>
+                          <div
+                            className="size-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="text-base shrink-0">{cat.emoji}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span
+                              className={cn(
+                                "text-xs truncate transition-colors",
+                                isSelected ? "font-bold text-primary" : "font-medium text-foreground"
+                              )}
+                            >
+                              {cat.name}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {cat.count} {cat.count === 1 ? "transaction" : "transactions"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          {/* Progress Bar & % */}
+                          <div className="hidden sm:flex flex-col items-end gap-1 w-16">
+                            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-300"
+                                style={{
+                                  width: `${cat.percentage}%`,
+                                  backgroundColor: color,
+                                }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-medium">
+                              {cat.percentage}%
+                            </span>
+                          </div>
+
+                          <span className="text-xs font-bold tabular-nums text-foreground">
+                            {formatCurrency(cat.amount)}
                           </span>
+
+                          {/* Accordion Expand Button */}
+                          {cat.subcategories.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={(e) => toggleCategoryAccordion(cat.id, e)}
+                              className={cn(
+                                "h-6 px-1.5 text-[10px] gap-1 font-medium transition-all shrink-0 cursor-pointer",
+                                isExpanded
+                                  ? "bg-muted text-foreground border-border"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                              )}
+                              title={isExpanded ? "Collapse subcategories" : "Expand subcategories"}
+                            >
+                              <span className="hidden sm:inline">{cat.subcategories.length} subs</span>
+                              <ChevronDown
+                                className={cn(
+                                  "size-3 transition-transform duration-200",
+                                  isExpanded && "rotate-180"
+                                )}
+                              />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Subcategories Accordion Content (Tight, high-density tree layout with multi-select!) */}
+                      {isExpanded && (
+                        <div className="ml-5 mr-2 my-0.5 pl-2.5 border-l-2 border-primary/20 flex flex-col gap-0.5">
+                          {/* All option */}
+                          <div
+                            onClick={(e) => handleSelectSubcategory(cat.id, null, e)}
+                            className={cn(
+                              "flex items-center justify-between py-1 px-2 rounded text-xs cursor-pointer transition-colors",
+                              isSelected && !cat.subcategories.some((s) => selectedSubcategoryNames.includes(s.name))
+                                ? "bg-primary/15 text-primary font-semibold"
+                                : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <span className="truncate font-medium">All {cat.name}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="tabular-nums font-semibold text-foreground">
+                                {formatCurrency(cat.amount)}
+                              </span>
+                              <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded font-medium text-muted-foreground">
+                                100%
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Individual Subcategories */}
+                          {cat.subcategories.map((sub) => {
+                            const isSubSelected = selectedSubcategoryNames.includes(sub.name);
+
+                            return (
+                              <div
+                                key={sub.id}
+                                onClick={(e) => handleSelectSubcategory(cat.id, sub.name, e)}
+                                className={cn(
+                                  "flex items-center justify-between py-1 px-2 rounded text-xs cursor-pointer transition-colors",
+                                  isSubSelected
+                                    ? "bg-primary/15 text-primary font-semibold"
+                                    : "hover:bg-muted/50 text-foreground/85"
+                                )}
+                              >
+                                <div className="flex items-center gap-2 min-w-0 pr-2">
+                                  <div
+                                    className={cn(
+                                      "size-3.5 rounded flex items-center justify-center border transition-colors shrink-0",
+                                      isSubSelected
+                                        ? "bg-primary border-primary text-primary-foreground"
+                                        : "border-border/80 bg-background"
+                                    )}
+                                  >
+                                    {isSubSelected && <Check className="size-2.5 stroke-[3]" />}
+                                  </div>
+                                  <span className="truncate">{sub.name}</span>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    ({sub.count})
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="tabular-nums font-medium text-foreground">
+                                    {formatCurrency(sub.amount)}
+                                  </span>
+                                  <span className="text-[9px] bg-muted/80 px-1 py-0.5 rounded text-muted-foreground font-medium">
+                                    {sub.percentage}%
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Accounts Breakdown Section */}
+          <Card className="border-border">
+            <CardHeader className="pb-3 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
+                    <Landmark className="size-4 text-primary" />
+                    Accounts Breakdown
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Click account to filter • Multi-select supported
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {selectedAccountIds.length > 0 && (
+                    <Badge variant="default" className="text-[11px] px-1.5 py-0 bg-blue-600 text-white">
+                      {selectedAccountIds.length} Selected
+                    </Badge>
+                  )}
+                  <Badge variant="secondary" className="text-xs">
+                    {accounts.length} Accounts
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-0 divide-y divide-border/60 max-h-[300px] overflow-y-auto [scrollbar-gutter:stable] [scrollbar-width:thin]">
+              {accounts.length === 0 ? (
+                <div className="p-8 text-center text-xs text-muted-foreground">
+                  No transactions recorded across accounts in this period.
+                </div>
+              ) : (
+                accounts.map((acc) => {
+                  const isSelected = selectedAccountIds.includes(acc.id);
+
+                  return (
+                    <div
+                      key={acc.id}
+                      onClick={() => handleToggleAccount(acc.id)}
+                      className={cn(
+                        "flex items-center justify-between p-3 transition-colors cursor-pointer select-none",
+                        isSelected ? "bg-blue-500/10 font-semibold" : "hover:bg-muted/30"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <div
+                          className={cn(
+                            "size-4 rounded flex items-center justify-center border transition-colors shrink-0",
+                            isSelected ? "bg-blue-600 border-blue-600 text-white" : "border-border/80 bg-background"
+                          )}
+                        >
+                          {isSelected && <Check className="size-3 stroke-[3]" />}
+                        </div>
+                        {getAccountGroupIcon(acc.group)}
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={cn(
+                                "text-xs truncate transition-colors",
+                                isSelected ? "font-bold text-blue-600 dark:text-blue-400" : "font-medium text-foreground"
+                              )}
+                            >
+                              {acc.name}
+                            </span>
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 uppercase text-muted-foreground">
+                              {acc.group?.replace("_", " ")}
+                            </Badge>
+                          </div>
                           <span className="text-[10px] text-muted-foreground">
-                            {cat.count} {cat.count === 1 ? "transaction" : "transactions"}
+                            {acc.count} {acc.count === 1 ? "transaction" : "transactions"}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-2.5 shrink-0">
                         {/* Progress Bar & % */}
-                        <div className="hidden sm:flex flex-col items-end gap-1 w-20">
+                        <div className="hidden sm:flex flex-col items-end gap-1 w-16">
                           <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full rounded-full transition-all duration-300"
-                              style={{
-                                width: `${cat.percentage}%`,
-                                backgroundColor: color,
-                              }}
+                              className="h-full rounded-full transition-all duration-300 bg-blue-500"
+                              style={{ width: `${acc.percentage}%` }}
                             />
                           </div>
                           <span className="text-[10px] text-muted-foreground font-medium">
-                            {cat.percentage}%
+                            {acc.percentage}%
                           </span>
                         </div>
 
                         <span className="text-xs font-bold tabular-nums text-foreground">
-                          {formatCurrency(cat.amount)}
+                          {formatCurrency(acc.amount)}
                         </span>
-
-                        {/* Accordion Expand Button */}
-                        {cat.subcategories.length > 0 && (
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            onClick={(e) => toggleCategoryAccordion(cat.id, e)}
-                            className={cn(
-                              "h-7 px-2 text-[11px] gap-1 font-medium transition-all shrink-0",
-                              isExpanded
-                                ? "bg-muted text-foreground border-border"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                            )}
-                            title={isExpanded ? "Collapse subcategories" : "Expand subcategories"}
-                          >
-                            <span className="hidden sm:inline">{cat.subcategories.length} subs</span>
-                            <ChevronDown
-                              className={cn(
-                                "size-3.5 transition-transform duration-200",
-                                isExpanded && "rotate-180"
-                              )}
-                            />
-                          </Button>
-                        )}
                       </div>
                     </div>
-
-                    {/* Subcategories Accordion Content (Theme-Aligned Tree Layout) */}
-                    {isExpanded && (
-                      <div className="ml-7 mr-3.5 my-1.5 pl-3.5 border-l-2 border-primary/25 flex flex-col gap-1">
-                        {/* "All" Option for this category */}
-                        <div
-                          onClick={(e) => handleSelectSubcategory(cat.id, null, e)}
-                          className={cn(
-                            "flex items-center justify-between py-1.5 px-2.5 rounded-md text-xs cursor-pointer transition-colors",
-                            isSelected && selectedSubcategoryName === null
-                              ? "bg-primary/15 text-primary font-semibold"
-                              : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
-                          )}
-                        >
-                          <span className="truncate font-medium">All {cat.name}</span>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="tabular-nums font-semibold text-foreground">
-                              {formatCurrency(cat.amount)}
-                            </span>
-                            <span className="text-[10px] bg-muted/80 text-muted-foreground px-1.5 py-0.5 rounded font-medium">
-                              100%
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Individual Subcategories */}
-                        {cat.subcategories.map((sub) => {
-                          const isSubSelected =
-                            isSelected && selectedSubcategoryName === sub.name;
-
-                          return (
-                            <div
-                              key={sub.id}
-                              onClick={(e) => handleSelectSubcategory(cat.id, sub.name, e)}
-                              className={cn(
-                                "flex items-center justify-between py-1.5 px-2.5 rounded-md text-xs cursor-pointer transition-colors",
-                                isSubSelected
-                                  ? "bg-primary/15 text-primary font-semibold"
-                                  : "hover:bg-muted/50 text-foreground/85"
-                              )}
-                            >
-                              <div className="flex items-center gap-2 min-w-0 pr-2">
-                                <span className="truncate">{sub.name}</span>
-                                <span className="text-[10px] text-muted-foreground">
-                                  ({sub.count})
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-2 shrink-0">
-                                <span className="tabular-nums font-medium text-foreground">
-                                  {formatCurrency(sub.amount)}
-                                </span>
-                                <span className="text-[10px] bg-muted/80 px-1.5 py-0.5 rounded text-muted-foreground font-medium">
-                                  {sub.percentage}%
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        {cat.subcategories.length === 0 && (
-                          <div className="py-2 text-[11px] text-muted-foreground italic text-center">
-                            No subcategories
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* 4. Itemized Transaction Records List (Screenshot 1 & 2) */}
+      {/* 4. Itemized Transaction Records List */}
       <Card className="border-border">
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1050,15 +1380,18 @@ function StatsContent() {
                 Transactions ({transactions.length})
               </CardTitle>
               <CardDescription className="text-xs">
-                {selectedCategoryMeta
-                  ? `Filtered by ${selectedCategoryMeta.emoji} ${selectedCategoryMeta.name}${
-                      selectedSubcategoryName ? ` › ${selectedSubcategoryName}` : ""
-                    }`
-                  : `All ${type.toLowerCase()} transactions for ${periodLabel}`}
+                {selectedCategoryIds.length > 0 || selectedAccountIds.length > 0
+                  ? `Filtered by ${[
+                      selectedCategoryIds.length > 0 ? `${selectedCategoryIds.length} categories` : "",
+                      selectedAccountIds.length > 0 ? `${selectedAccountIds.length} accounts` : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" & ")}${selectedSubcategoryNames.length > 0 ? ` › ${selectedSubcategoryNames.join(", ")}` : ""}`
+                  : `All ${type.toLowerCase()} transactions for ${periodInfo.label}`}
               </CardDescription>
             </div>
 
-            {/* Sort Controls: shadcn Select dropdown */}
+            {/* Sort Controls */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground hidden sm:inline">Sort by:</span>
               <Select
@@ -1095,7 +1428,7 @@ function StatsContent() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 divide-y divide-border/60 max-h-[500px] overflow-y-auto">
+        <CardContent className="p-0 divide-y divide-border/60 max-h-[500px] overflow-y-auto [scrollbar-gutter:stable] [scrollbar-width:thin]">
           {transactions.length === 0 ? (
             <div className="p-10 text-center text-xs text-muted-foreground">
               No transactions matching the active filters in this period.

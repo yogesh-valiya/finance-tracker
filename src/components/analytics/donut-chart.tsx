@@ -9,6 +9,7 @@ interface DonutChartProps {
   total: number;
   type?: "EXPENSE" | "INCOME";
   selectedCategoryId?: string | null;
+  selectedCategoryIds?: string[];
   onSelectCategory?: (categoryId: string) => void;
   onDoubleClickCategory?: (categoryId: string) => void;
 }
@@ -33,12 +34,19 @@ export function DonutChart({
   total,
   type = "EXPENSE",
   selectedCategoryId,
+  selectedCategoryIds = [],
   onSelectCategory,
   onDoubleClickCategory,
 }: DonutChartProps) {
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
   const [inspectedId, setInspectedId] = React.useState<string | null>(null);
   const clickTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const effectiveSelectedIds = React.useMemo(() => {
+    if (selectedCategoryIds && selectedCategoryIds.length > 0) return selectedCategoryIds;
+    if (selectedCategoryId) return [selectedCategoryId];
+    return [];
+  }, [selectedCategoryIds, selectedCategoryId]);
 
   const chartData = React.useMemo(() => {
     return data.map((item, index) => ({
@@ -165,7 +173,7 @@ export function DonutChart({
               cursor="pointer"
             >
               {chartData.map((entry, index) => {
-                const isSelected = selectedCategoryId === entry.id;
+                const isSelected = effectiveSelectedIds.includes(entry.id);
                 const isInspected = inspectedId === entry.id;
                 const isHovered = activeIndex === index;
 
@@ -177,7 +185,7 @@ export function DonutChart({
                     strokeWidth={isSelected ? 2.5 : isInspected ? 1.5 : 0}
                     cursor="pointer"
                     opacity={
-                      selectedCategoryId
+                      effectiveSelectedIds.length > 0
                         ? isSelected
                           ? 1
                           : 0.35
@@ -209,7 +217,7 @@ export function DonutChart({
               </span>
               <span className="text-[9px] text-muted-foreground font-medium">
                 {centerItem.percentage}%
-                {selectedCategoryId === centerItem.id ? (
+                {effectiveSelectedIds.includes(centerItem.id) ? (
                   <span className="text-primary font-bold ml-1">• Filtered</span>
                 ) : (
                   <span className="text-primary/90 ml-1">• 2-click filter</span>

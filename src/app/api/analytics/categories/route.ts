@@ -20,6 +20,15 @@ export interface CategoryBreakdownItem {
   }>;
 }
 
+export interface AccountBreakdownItem {
+  id: string;
+  name: string;
+  group: string;
+  amount: number;
+  percentage: number;
+  count: number;
+}
+
 export async function GET(req: Request) {
   try {
     const user = await getAuthenticatedUser();
@@ -32,6 +41,7 @@ export async function GET(req: Request) {
 
     const type = (searchParams.get("type") || "EXPENSE") as TransactionType;
     const granularity = searchParams.get("granularity") || "monthly";
+    const trendGranularity = (searchParams.get("trendGranularity") || "auto") as "daily" | "weekly" | "monthly" | "auto";
     const year = parseInt(searchParams.get("year") || now.getFullYear().toString(), 10);
     const month = parseInt(searchParams.get("month") || (now.getMonth() + 1).toString(), 10);
 
@@ -40,9 +50,26 @@ export async function GET(req: Request) {
     const startMonth = startMonthParam ? parseInt(startMonthParam, 10) : null;
     const endMonth = endMonthParam ? parseInt(endMonthParam, 10) : null;
 
-    const categoryId = searchParams.get("categoryId") || null;
+    // Support single and multi-select categories
+    const categoryIdsParam = searchParams.get("categoryIds") || searchParams.get("categoryId");
+    const categoryIds = categoryIdsParam
+      ? categoryIdsParam.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+    const categoryId = categoryIds[0] || null;
+
+    // Support single and multi-select accounts
+    const accountIdsParam = searchParams.get("accountIds") || searchParams.get("accountId");
+    const accountIds = accountIdsParam
+      ? accountIdsParam.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+    const accountId = accountIds[0] || null;
+
+    // Support single and multi-select subcategories
+    const subcategoryNamesParam = searchParams.get("subcategoryNames") || searchParams.get("subcategory") || searchParams.get("subcategoryName");
+    const subcategoryNames = subcategoryNamesParam
+      ? subcategoryNamesParam.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
     const subcategoryId = searchParams.get("subcategoryId") || null;
-    const subcategoryName = searchParams.get("subcategoryName") || null;
     const sort = searchParams.get("sort") || "date_desc";
 
     // Client timezone offset in minutes (e.g., -330 for IST UTC+5:30)
@@ -84,7 +111,7 @@ export async function GET(req: Request) {
       priorStartDate = new Date(Date.UTC(year - 1, 0, 1, 0, 0, 0, 0) + tzOffsetMs);
       priorEndDate = new Date(Date.UTC(year - 1, 11, 31, 23, 59, 59, 999) + tzOffsetMs);
     } else if (granularity === "weekly") {
-      // 4. Weekly (current week Sun/Mon to Sat/Sun)
+      // 4. Weekly (current week Sun/Mon to Sat/Sun or custom week span)
       const currentDay = now.getDay();
       const diff = now.getDate() - currentDay;
       const weekStart = new Date(now);
@@ -114,27 +141,47 @@ export async function GET(req: Request) {
       date: { gte: startDate, lte: endDate },
     };
 
-    // Query all transactions in period for category breakdown
+    // Filter by accounts if specified
+    if (accountIds.length === 1) {
+      transactionsWhere.accountId = accountIds[0];
+    } else if (accountIds.length > 1) {
+      transactionsWhere.accountId = { in: accountIds };
+    }
+
+    // Query all transactions in period for category & account breakdown
     const allPeriodTransactions = await prisma.transaction.findMany({
       where: transactionsWhere,
       include: {
         category: true,
         subcategory: true,
+        account: { select: { id: true, name: true, group: true } },
       },
     });
 
     // Query prior period total for % comparison
+    const priorWhere: Prisma.TransactionWhereInput = {
+      userId: user.id,
+      type,
+      date: { gte: priorStartDate, lte: priorEndDate },
+    };
+    if (accountIds.length === 1) {
+      priorWhere.accountId = accountIds[0];
+    } else if (accountIds.length > 1) {
+      priorWhere.accountId = { in: accountIds };
+    }
+    if (categoryIds.length === 1) {
+      priorWhere.categoryId = categoryIds[0];
+    } else if (categoryIds.length > 1) {
+      priorWhere.categoryId = { in: categoryIds };
+    }
+
     const priorSum = await prisma.transaction.aggregate({
-      where: {
-        userId: user.id,
-        type,
-        date: { gte: priorStartDate, lte: priorEndDate },
-      },
+      where: priorWhere,
       _sum: { amount: true },
     });
     const priorTotal = new Decimal(priorSum._sum.amount?.toString() || 0).toNumber();
 
-    // Aggregate by category and subcategories
+    // Aggregate by category, subcategories, and accounts
     let grandTotal = new Decimal(0);
     const categoryMap = new Map<
       string,
@@ -148,40 +195,70 @@ export async function GET(req: Request) {
       }
     >();
 
+    const accountMap = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        group: string;
+        total: Decimal;
+        count: number;
+      }
+    >();
+
     for (const tx of allPeriodTransactions) {
-      if (!tx.category) continue;
-      const catId = tx.category.id;
       const amt = new Decimal(tx.amount.toString());
       grandTotal = grandTotal.plus(amt);
 
-      if (!categoryMap.has(catId)) {
-        categoryMap.set(catId, {
-          id: catId,
-          name: tx.category.name,
-          emoji: tx.category.emoji,
-          total: new Decimal(0),
-          count: 0,
-          subMap: new Map(),
-        });
-      }
-
-      const catEntry = categoryMap.get(catId)!;
-      catEntry.total = catEntry.total.plus(amt);
-      catEntry.count++;
-
-      if (tx.subcategory) {
-        const subId = tx.subcategory.id;
-        if (!catEntry.subMap.has(subId)) {
-          catEntry.subMap.set(subId, {
-            id: subId,
-            name: tx.subcategory.name,
+      // Account breakdown
+      if (tx.account) {
+        const accId = tx.account.id;
+        if (!accountMap.has(accId)) {
+          accountMap.set(accId, {
+            id: accId,
+            name: tx.account.name,
+            group: tx.account.group,
             total: new Decimal(0),
             count: 0,
           });
         }
-        const subEntry = catEntry.subMap.get(subId)!;
-        subEntry.total = subEntry.total.plus(amt);
-        subEntry.count++;
+        const accEntry = accountMap.get(accId)!;
+        accEntry.total = accEntry.total.plus(amt);
+        accEntry.count++;
+      }
+
+      // Category breakdown
+      if (tx.category) {
+        const catId = tx.category.id;
+        if (!categoryMap.has(catId)) {
+          categoryMap.set(catId, {
+            id: catId,
+            name: tx.category.name,
+            emoji: tx.category.emoji,
+            total: new Decimal(0),
+            count: 0,
+            subMap: new Map(),
+          });
+        }
+
+        const catEntry = categoryMap.get(catId)!;
+        catEntry.total = catEntry.total.plus(amt);
+        catEntry.count++;
+
+        if (tx.subcategory) {
+          const subId = tx.subcategory.id;
+          if (!catEntry.subMap.has(subId)) {
+            catEntry.subMap.set(subId, {
+              id: subId,
+              name: tx.subcategory.name,
+              total: new Decimal(0),
+              count: 0,
+            });
+          }
+          const subEntry = catEntry.subMap.get(subId)!;
+          subEntry.total = subEntry.total.plus(amt);
+          subEntry.count++;
+        }
       }
     }
 
@@ -213,19 +290,37 @@ export async function GET(req: Request) {
     });
 
     items.sort((a, b) => b.amount - a.amount);
+
+    const accountItems: AccountBreakdownItem[] = Array.from(accountMap.values())
+      .map((acc) => ({
+        id: acc.id,
+        name: acc.name,
+        group: acc.group,
+        amount: acc.total.toNumber(),
+        percentage: grandTotal.isZero() ? 0 : Math.round(acc.total.dividedBy(grandTotal).times(1000).toNumber()) / 10,
+        count: acc.count,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+
     const currentTotal = grandTotal.toNumber();
+
+    // If categories are filtered, calculate total of selected categories
+    let filteredTotal = currentTotal;
+    if (categoryIds.length > 0) {
+      filteredTotal = items
+        .filter((cat) => categoryIds.includes(cat.id))
+        .reduce((sum, cat) => sum + cat.amount, 0);
+    }
 
     let percentageChange = 0;
     if (priorTotal > 0) {
-      percentageChange = Math.round(((currentTotal - priorTotal) / priorTotal) * 100);
+      const compareTotal = categoryIds.length > 0 ? filteredTotal : currentTotal;
+      percentageChange = Math.round(((compareTotal - priorTotal) / priorTotal) * 100);
     }
 
     // -------------------------------------------------------------
     // Granularity-Aware Trend Points (with Subcategories breakdown)
-    // - Annually: 12 months (Jan - Dec)
-    // - Monthly: Days of the month (1 - 31)
-    // - Weekly: Days of the week (Mon - Sun)
-    // - Custom range: Days if <= 45 days, otherwise months
+    // - trendGranularity can be 'daily', 'weekly', 'monthly', or 'auto'
     // -------------------------------------------------------------
     interface TrendBucket {
       label: string;
@@ -239,94 +334,77 @@ export async function GET(req: Request) {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    let activeTrendGranularity: "annually" | "monthly" | "weekly" | "custom" = "monthly";
-
-    if (customStartParam && customEndParam) {
-      activeTrendGranularity = "custom";
-      const totalDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-      if (totalDays <= 45) {
-        // Daily buckets
-        for (let d = 0; d < totalDays; d++) {
-          const bStart = new Date(startDate.getTime() + d * 86400000);
-          const bEnd = new Date(startDate.getTime() + (d + 1) * 86400000 - 1);
-          const dateStr = bStart.toISOString().split("T")[0];
-          const dNum = bStart.getDate();
-          const mNum = bStart.getMonth();
-          buckets.push({
-            label: `${dNum} ${monthNames[mNum]}`,
-            index: d + 1,
-            date: dateStr,
-            startDate: bStart,
-            endDate: bEnd,
-          });
-        }
+    let effectiveTrendGranularity = trendGranularity;
+    if (effectiveTrendGranularity === "auto") {
+      const totalDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000));
+      if (granularity === "weekly") {
+        effectiveTrendGranularity = "daily";
+      } else if (granularity === "annually" || totalDays > 45) {
+        effectiveTrendGranularity = "monthly";
       } else {
-        // Monthly buckets across custom range
-        const startY = startDate.getFullYear();
-        const startM = startDate.getMonth();
-        const endY = endDate.getFullYear();
-        const endM = endDate.getMonth();
-        let idx = 0;
-        for (let y = startY; y <= endY; y++) {
-          const mFrom = y === startY ? startM : 0;
-          const mTo = y === endY ? endM : 11;
-          for (let m = mFrom; m <= mTo; m++) {
-            const bStart = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0) + tzOffsetMs);
-            const bEnd = new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999) + tzOffsetMs);
-            buckets.push({
-              label: `${monthNames[m]} ${y !== year ? `'${y % 100}` : ""}`.trim(),
-              index: idx++,
-              startDate: bStart,
-              endDate: bEnd,
-            });
-          }
-        }
+        effectiveTrendGranularity = "daily";
       }
-    } else if (granularity === "annually" || (startMonth && endMonth && Math.abs(endMonth - startMonth) > 1)) {
-      activeTrendGranularity = "annually";
-      for (let m = 0; m < 12; m++) {
-        const bStart = new Date(Date.UTC(year, m, 1, 0, 0, 0, 0) + tzOffsetMs);
-        const bEnd = new Date(Date.UTC(year, m + 1, 0, 23, 59, 59, 999) + tzOffsetMs);
-        buckets.push({
-          label: monthNames[m],
-          index: m + 1,
-          startDate: bStart,
-          endDate: bEnd,
-        });
-      }
-    } else if (granularity === "weekly") {
-      activeTrendGranularity = "weekly";
-      for (let d = 0; d < 7; d++) {
+    }
+
+    if (effectiveTrendGranularity === "daily") {
+      // Daily buckets from startDate to endDate
+      const totalDays = Math.min(90, Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000)));
+      for (let d = 0; d < totalDays; d++) {
         const bStart = new Date(startDate.getTime() + d * 86400000);
         const bEnd = new Date(startDate.getTime() + (d + 1) * 86400000 - 1);
-        const dayName = dayNames[new Date(bStart.getTime() - tzOffsetMs).getUTCDay()];
-        const dayOfMonth = new Date(bStart.getTime() - tzOffsetMs).getUTCDate();
+        const dNum = bStart.getDate();
+        const mNum = bStart.getMonth();
         buckets.push({
-          label: `${dayName} ${dayOfMonth}`,
+          label: totalDays <= 31 ? `${dNum}` : `${dNum} ${monthNames[mNum]}`,
           index: d + 1,
           date: bStart.toISOString().split("T")[0],
           startDate: bStart,
           endDate: bEnd,
         });
       }
-    } else {
-      // Monthly: Days of the month (1 to 28/30/31)
-      activeTrendGranularity = "monthly";
-      const daysInMonth = new Date(year, month, 0).getDate();
-      for (let d = 1; d <= daysInMonth; d++) {
-        const bStart = new Date(Date.UTC(year, month - 1, d, 0, 0, 0, 0) + tzOffsetMs);
-        const bEnd = new Date(Date.UTC(year, month - 1, d, 23, 59, 59, 999) + tzOffsetMs);
+    } else if (effectiveTrendGranularity === "weekly") {
+      // Weekly buckets (7 days each) across the interval
+      const totalDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000));
+      const numWeeks = Math.ceil(totalDays / 7);
+      for (let w = 0; w < numWeeks; w++) {
+        const bStart = new Date(startDate.getTime() + w * 7 * 86400000);
+        const bEnd = new Date(Math.min(endDate.getTime(), startDate.getTime() + (w + 1) * 7 * 86400000 - 1));
+        const sDay = bStart.getDate();
+        const sMonth = monthNames[bStart.getMonth()];
+        const eDay = bEnd.getDate();
+        const eMonth = monthNames[bEnd.getMonth()];
+        const label = sMonth === eMonth ? `${sDay}–${eDay} ${sMonth}` : `${sDay} ${sMonth} – ${eDay} ${eMonth}`;
         buckets.push({
-          label: d.toString(),
-          index: d,
-          date: `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`,
+          label: `W${w + 1} (${label})`,
+          index: w + 1,
           startDate: bStart,
           endDate: bEnd,
         });
       }
+    } else {
+      // Monthly buckets
+      const startY = startDate.getFullYear();
+      const startM = startDate.getMonth();
+      const endY = endDate.getFullYear();
+      const endM = endDate.getMonth();
+      let idx = 0;
+      for (let y = startY; y <= endY; y++) {
+        const mFrom = y === startY ? startM : 0;
+        const mTo = y === endY ? endM : 11;
+        for (let m = mFrom; m <= mTo; m++) {
+          const bStart = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0) + tzOffsetMs);
+          const bEnd = new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999) + tzOffsetMs);
+          buckets.push({
+            label: `${monthNames[m]}${y !== year ? ` '${y % 100}` : ""}`,
+            index: ++idx,
+            startDate: bStart,
+            endDate: bEnd,
+          });
+        }
+      }
     }
 
-    // Query all transactions in the entire trend interval in ONE query
+    // Query all transactions in the entire trend interval
     const trendSpanStart = buckets[0]?.startDate || startDate;
     const trendSpanEnd = buckets[buckets.length - 1]?.endDate || endDate;
 
@@ -336,13 +414,24 @@ export async function GET(req: Request) {
       date: { gte: trendSpanStart, lte: trendSpanEnd },
     };
 
-    if (categoryId) {
-      trendWhere.categoryId = categoryId;
+    if (categoryIds.length === 1) {
+      trendWhere.categoryId = categoryIds[0];
+    } else if (categoryIds.length > 1) {
+      trendWhere.categoryId = { in: categoryIds };
     }
+
+    if (accountIds.length === 1) {
+      trendWhere.accountId = accountIds[0];
+    } else if (accountIds.length > 1) {
+      trendWhere.accountId = { in: accountIds };
+    }
+
     if (subcategoryId) {
       trendWhere.subcategoryId = subcategoryId;
-    } else if (subcategoryName) {
-      trendWhere.subcategory = { name: subcategoryName };
+    } else if (subcategoryNames.length === 1) {
+      trendWhere.subcategory = { name: subcategoryNames[0] };
+    } else if (subcategoryNames.length > 1) {
+      trendWhere.subcategory = { name: { in: subcategoryNames } };
     }
 
     const trendRawTxs = await prisma.transaction.findMany({
@@ -398,13 +487,24 @@ export async function GET(req: Request) {
       date: { gte: startDate, lte: endDate },
     };
 
-    if (categoryId) {
-      itemizedWhere.categoryId = categoryId;
+    if (categoryIds.length === 1) {
+      itemizedWhere.categoryId = categoryIds[0];
+    } else if (categoryIds.length > 1) {
+      itemizedWhere.categoryId = { in: categoryIds };
     }
+
+    if (accountIds.length === 1) {
+      itemizedWhere.accountId = accountIds[0];
+    } else if (accountIds.length > 1) {
+      itemizedWhere.accountId = { in: accountIds };
+    }
+
     if (subcategoryId) {
       itemizedWhere.subcategoryId = subcategoryId;
-    } else if (subcategoryName) {
-      itemizedWhere.subcategory = { name: subcategoryName };
+    } else if (subcategoryNames.length === 1) {
+      itemizedWhere.subcategory = { name: subcategoryNames[0] };
+    } else if (subcategoryNames.length > 1) {
+      itemizedWhere.subcategory = { name: { in: subcategoryNames } };
     }
 
     let orderBy: Prisma.TransactionOrderByWithRelationInput = { date: "desc" };
@@ -427,18 +527,26 @@ export async function GET(req: Request) {
       },
     });
 
-    // Optional category details if categoryId is active
-    let selectedCategory = null;
-    if (categoryId) {
-      selectedCategory = await prisma.category.findFirst({
-        where: { id: categoryId, userId: user.id },
-        include: { subcategories: true },
-      });
-    }
+    // Optional category and account details for metadata
+    const [selectedCategories, selectedAccounts] = await Promise.all([
+      categoryIds.length > 0
+        ? prisma.category.findMany({
+            where: { id: { in: categoryIds }, userId: user.id },
+            include: { subcategories: true },
+          })
+        : Promise.resolve([]),
+      accountIds.length > 0
+        ? prisma.account.findMany({
+            where: { id: { in: accountIds }, userId: user.id },
+            select: { id: true, name: true, group: true },
+          })
+        : Promise.resolve([]),
+    ]);
 
     return NextResponse.json({
       type,
       granularity,
+      trendGranularity: effectiveTrendGranularity,
       period: {
         year,
         month,
@@ -448,17 +556,21 @@ export async function GET(req: Request) {
         endDate: endDate.toISOString(),
       },
       currentTotal,
+      filteredTotal,
       priorTotal,
       percentageChange,
       categories: items,
+      accounts: accountItems,
       trend: {
-        granularity: activeTrendGranularity,
+        granularity: effectiveTrendGranularity,
         points: trendPoints,
         subSeries,
       },
       annualTrend: trendPoints,
       transactions: itemizedTransactions,
-      selectedCategory,
+      selectedCategory: selectedCategories[0] || null,
+      selectedCategories,
+      selectedAccounts,
     });
   } catch (error) {
     console.error("Failed to get category breakdown:", error);

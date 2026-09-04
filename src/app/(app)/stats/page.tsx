@@ -553,61 +553,64 @@ function StatsContent() {
 
   // Multi-Select Category Handler: toggles category without clearing others!
   function handleToggleCategory(catId: string) {
-    setSelectedCategoryIds((prev) => {
-      const exists = prev.includes(catId);
-      const next = exists ? prev.filter((id) => id !== catId) : [...prev, catId];
-      if (!exists) {
-        setExpandedCats((exp) => ({ ...exp, [catId]: true }));
+    const exists = selectedCategoryIds.includes(catId);
+    const nextCats = exists
+      ? selectedCategoryIds.filter((id) => id !== catId)
+      : [...selectedCategoryIds, catId];
+
+    let nextSubs = selectedSubcategoryNames;
+    if (exists) {
+      // Deselecting category: auto-remove all subcategories under this category
+      const targetCat = categories.find((c) => c.id === catId);
+      if (targetCat && targetCat.subcategories?.length > 0) {
+        const subNamesToRemove = targetCat.subcategories.map((s) => s.name);
+        nextSubs = selectedSubcategoryNames.filter((name) => !subNamesToRemove.includes(name));
       }
-      updateUrl({ categoryIds: next });
-      return next;
-    });
+    } else {
+      setExpandedCats((exp) => ({ ...exp, [catId]: true }));
+    }
+
+    setSelectedCategoryIds(nextCats);
+    setSelectedSubcategoryNames(nextSubs);
+    updateUrl({ categoryIds: nextCats, subcategories: nextSubs });
   }
 
   // Multi-Select Account Handler: toggles account without clearing others!
   function handleToggleAccount(accId: string) {
-    setSelectedAccountIds((prev) => {
-      const exists = prev.includes(accId);
-      const next = exists ? prev.filter((id) => id !== accId) : [...prev, accId];
-      updateUrl({ accountIds: next });
-      return next;
-    });
+    const exists = selectedAccountIds.includes(accId);
+    const nextAccs = exists
+      ? selectedAccountIds.filter((id) => id !== accId)
+      : [...selectedAccountIds, accId];
+    setSelectedAccountIds(nextAccs);
+    updateUrl({ accountIds: nextAccs });
   }
 
   // Subcategory Selection inside Expanded Category: Multi-select supported!
   function handleSelectSubcategory(catId: string, subName: string | null, e?: React.MouseEvent) {
     if (e) e.stopPropagation();
+
+    const nextCats = catId && !selectedCategoryIds.includes(catId)
+      ? [...selectedCategoryIds, catId]
+      : selectedCategoryIds;
+
+    let nextSubs = selectedSubcategoryNames;
     if (subName === null) {
       // Clear subcategories under this category
       const targetCat = categories.find((c) => c.id === catId);
       const subNamesToRemove = targetCat ? targetCat.subcategories.map((s) => s.name) : [];
-      setSelectedSubcategoryNames((prev) => {
-        const next = prev.filter((name) => !subNamesToRemove.includes(name));
-        updateUrl({ subcategories: next });
-        return next;
-      });
-      if (catId && !selectedCategoryIds.includes(catId)) {
-        setSelectedCategoryIds((prev) => {
-          const next = [...prev, catId];
-          updateUrl({ categoryIds: next });
-          return next;
-        });
-      }
+      nextSubs = selectedSubcategoryNames.filter((name) => !subNamesToRemove.includes(name));
     } else {
-      if (catId && !selectedCategoryIds.includes(catId)) {
-        setSelectedCategoryIds((prev) => {
-          const next = [...prev, catId];
-          updateUrl({ categoryIds: next });
-          return next;
-        });
-      }
-      setSelectedSubcategoryNames((prev) => {
-        const exists = prev.includes(subName);
-        const next = exists ? prev.filter((s) => s !== subName) : [...prev, subName];
-        updateUrl({ subcategories: next });
-        return next;
-      });
+      const exists = selectedSubcategoryNames.includes(subName);
+      nextSubs = exists
+        ? selectedSubcategoryNames.filter((s) => s !== subName)
+        : [...selectedSubcategoryNames, subName];
     }
+
+    if (nextCats !== selectedCategoryIds) {
+      setSelectedCategoryIds(nextCats);
+    }
+    setSelectedSubcategoryNames(nextSubs);
+    updateUrl({ categoryIds: nextCats, subcategories: nextSubs });
   }
 
   // Category Accordion Toggle (Expand / Collapse)
@@ -662,78 +665,50 @@ function StatsContent() {
         </div>
 
         {/* Range & Smart Period Controls */}
-        <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
-          {/* Unified Range Selector Dropdown */}
-          <Select value={rangePreset} onValueChange={(val) => handleRangePresetChange(val as RangePreset)}>
-            <SelectTrigger className="h-8 text-xs bg-card border-border font-medium w-[100px] sm:w-[135px] cursor-pointer shadow-2xs">
-              <span className="hidden sm:inline text-muted-foreground mr-1 shrink-0">Range:</span>
-              <span className="font-semibold truncate">{RANGE_PRESET_LABELS[rangePreset] || "Monthly"}</span>
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="monthly" className="text-xs">
-                Monthly
-              </SelectItem>
-              <SelectItem value="annually" className="text-xs">
-                Annually
-              </SelectItem>
-              <SelectItem value="weekly" className="text-xs">
-                Weekly
-              </SelectItem>
-              <SelectItem value="biweekly" className="text-xs">
-                Bi-weekly
-              </SelectItem>
-              <SelectItem value="last2months" className="text-xs">
-                Last 2 Months
-              </SelectItem>
-              <SelectItem value="last3months" className="text-xs">
-                Last 3 Months
-              </SelectItem>
-              <SelectItem value="custom" className="text-xs">
-                Custom Range...
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Smart Period Navigator: adapts dynamically to the active range preset */}
-          <div className="flex items-center bg-card border border-border rounded-lg shadow-2xs shrink-0">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={handlePrevPeriod}
-              className="size-8 cursor-pointer"
-              title="Previous period"
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <span className="px-2 sm:px-3 text-xs font-semibold select-none min-w-[80px] sm:min-w-[95px] text-center tabular-nums truncate">
-              {periodInfo.label}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={handleNextPeriod}
-              className="size-8 cursor-pointer"
-              title="Next period"
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-          </div>
-
-          {/* Custom Date Range Popover */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Smart Period Navigator with integrated Date Picker Popover */}
           <Popover open={customDateOpen} onOpenChange={setCustomDateOpen}>
-            <PopoverTrigger
-              type="button"
+            <div
               className={cn(
-                "size-8 sm:w-auto sm:px-2.5 sm:gap-1.5 text-xs inline-flex items-center justify-center rounded-md border transition-colors shadow-2xs font-medium cursor-pointer shrink-0",
-                rangePreset === "custom"
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
-                  : "border-border bg-card text-foreground hover:bg-muted"
+                "flex items-center bg-card border rounded-lg shadow-2xs shrink-0 transition-colors",
+                rangePreset === "custom" ? "border-primary/40 bg-primary/5" : "border-border"
               )}
-              title="Custom Date Range Picker"
             >
-              <Calendar className="size-3.5" />
-              <span className="hidden sm:inline">Custom</span>
-            </PopoverTrigger>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={handlePrevPeriod}
+                className="size-8 cursor-pointer"
+                title={rangePreset === "custom" ? "Pick custom dates" : "Previous period"}
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <PopoverTrigger
+                type="button"
+                onClick={() => {
+                  setTempStartDate(startDate || "");
+                  setTempEndDate(endDate || "");
+                }}
+                className={cn(
+                  "px-2.5 sm:px-3 text-xs font-semibold select-none min-w-[80px] sm:min-w-[95px] text-center tabular-nums truncate h-8 inline-flex items-center justify-center cursor-pointer transition-colors hover:text-primary",
+                  rangePreset === "custom" && "text-primary font-bold"
+                )}
+                title="Click to select custom date range"
+              >
+                {rangePreset === "custom" && <Calendar className="size-3.5 mr-1.5 text-primary shrink-0" />}
+                <span>{periodInfo.label}</span>
+              </PopoverTrigger>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={handleNextPeriod}
+                className="size-8 cursor-pointer"
+                title={rangePreset === "custom" ? "Pick custom dates" : "Next period"}
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+
             <PopoverContent className="w-72 p-3 space-y-3" align="end">
               <div className="space-y-1">
                 <h4 className="text-xs font-semibold text-foreground">Custom Date Range</h4>
@@ -802,6 +777,51 @@ function StatsContent() {
               </div>
             </PopoverContent>
           </Popover>
+
+          {/* Unified Range Selector Dropdown (Moved to the right, prominently highlighted when custom) */}
+          <Select value={rangePreset} onValueChange={(val) => handleRangePresetChange(val as RangePreset)}>
+            <SelectTrigger
+              className={cn(
+                "h-8 text-xs font-medium w-auto min-w-[105px] sm:min-w-[140px] px-2.5 cursor-pointer shadow-2xs transition-colors",
+                rangePreset === "custom"
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 font-semibold"
+                  : "bg-card border-border text-foreground hover:bg-muted/40"
+              )}
+            >
+              <span
+                className={cn(
+                  "hidden sm:inline mr-1 shrink-0",
+                  rangePreset === "custom" ? "text-primary-foreground/85" : "text-muted-foreground"
+                )}
+              >
+                Range:
+              </span>
+              <span className="font-semibold truncate">{RANGE_PRESET_LABELS[rangePreset] || "Monthly"}</span>
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="monthly" className="text-xs">
+                Monthly
+              </SelectItem>
+              <SelectItem value="annually" className="text-xs">
+                Annually
+              </SelectItem>
+              <SelectItem value="weekly" className="text-xs">
+                Weekly
+              </SelectItem>
+              <SelectItem value="biweekly" className="text-xs">
+                Bi-weekly
+              </SelectItem>
+              <SelectItem value="last2months" className="text-xs">
+                Last 2 Months
+              </SelectItem>
+              <SelectItem value="last3months" className="text-xs">
+                Last 3 Months
+              </SelectItem>
+              <SelectItem value="custom" className="text-xs">
+                Custom Range...
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

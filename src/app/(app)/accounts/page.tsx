@@ -32,7 +32,6 @@ import {
   ChevronDown,
   ArrowUpDown,
   Eye,
-  Settings2,
   AlertCircle,
   BarChart3,
   Loader2,
@@ -310,18 +309,16 @@ export default function AccountsPage() {
                     return (
                       <div
                         key={account.id}
+                        onClick={() => router.push(`/accounts/${account.id}/info`)}
                         className={cn(
-                          "flex items-center justify-between p-3.5 hover:bg-muted/30 transition-colors group",
+                          "flex items-center justify-between p-3.5 hover:bg-muted/30 transition-colors group cursor-pointer",
                           account.isHidden && "opacity-50"
                         )}
                       >
                         {/* Account Left info */}
-                        <Link
-                          href={`/accounts/${account.id}`}
-                          className="flex flex-col flex-1 min-w-0 pr-3 cursor-pointer"
-                        >
+                        <div className="flex flex-col flex-1 min-w-0 pr-3">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-foreground truncate">
+                            <span className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">
                               {account.name}
                             </span>
                             {!account.includeInTotals && (
@@ -346,9 +343,9 @@ export default function AccountsPage() {
                               {account.description}
                             </span>
                           )}
-                        </Link>
+                        </div>
 
-                        {/* Balances & Info Link */}
+                        {/* Balances & Analytics Link */}
                         <div className="flex items-center gap-3 shrink-0">
                           {isCreditCard ? (
                             <div className="flex flex-col items-end text-right">
@@ -381,14 +378,15 @@ export default function AccountsPage() {
                           )}
 
                           <Link
-                            href={`/accounts/${account.id}/info`}
+                            href={`/stats?accountIds=${account.id}`}
+                            onClick={(e) => e.stopPropagation()}
                             className={cn(
-                              buttonVariants({ variant: "ghost", size: "icon-xs" }),
-                              "size-7 text-muted-foreground hover:text-foreground opacity-60 group-hover:opacity-100"
+                              buttonVariants({ variant: "outline", size: "icon-xs" }),
+                              "size-7 rounded-md text-primary border-primary/30 bg-primary/10 hover:bg-primary/20 hover:border-primary/50 transition-colors shadow-2xs"
                             )}
-                            title="Account Info & Configuration"
+                            title="View Account Analytics"
                           >
-                            <Settings2 className="size-3.5" />
+                            <BarChart3 className="size-3.5" />
                           </Link>
                         </div>
                       </div>

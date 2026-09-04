@@ -119,7 +119,7 @@ export default function AccountInfoPage() {
         throw new Error(data.error || "Failed to update account");
       }
 
-      router.push(`/accounts/${id}`);
+      router.push("/accounts");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save account");
@@ -171,7 +171,7 @@ export default function AccountInfoPage() {
       <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
         <div className="flex items-center gap-3">
           <Button
-            render={<Link href={`/accounts/${id}`} />}
+            render={<Link href="/accounts" />}
             variant="ghost"
             size="icon-sm"
             className="size-8"

@@ -125,9 +125,9 @@ jobs:
               echo "==> Starting application container on port $TARGET_PORT..."
               docker compose up -d app
 
-              # 4g. Apply database schema updates
+              # 4g. Apply database schema updates using local offline Prisma CLI
               echo "==> Synchronizing database schema with Prisma..."
-              docker compose exec -T app npx prisma db push --accept-data-loss
+              docker compose exec -T app node ./node_modules/prisma/build/index.js db push --accept-data-loss
 
               # 4h. Clean up old unused images to conserve server disk space
               echo "==> Pruning dangling docker images..."

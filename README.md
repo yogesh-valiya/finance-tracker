@@ -174,14 +174,169 @@ To build and run both the Next.js standalone container and PostgreSQL in product
 docker compose up --build -d
 ```
 
-The application will be accessible at `http://localhost:3000`.
+The application will be accessible locally at `http://localhost:3000`.
 
 ### Manual Production Build
 
 ```bash
 npm run build
-npm run start
+npm run start -- -H 0.0.0.0 -p 3000
 ```
+
+---
+
+## Making the Application Accessible Over the Internet
+
+When deploying to a remote server (such as an AWS EC2, DigitalOcean Droplet, Hetzner VPS, or a home server / homelab), follow these steps to securely expose your site to the public internet.
+
+### 1. Prerequisite: Add Domain to Firebase Authorized Domains (CRITICAL)
+
+Firebase Authentication blocks authentication requests (Google Sign-In, Email/Password) from origins that are not explicitly authorized:
+
+1. Open the [Firebase Console](https://console.firebase.google.com/).
+2. Select your project (e.g., `super-trackerr`).
+3. Navigate to **Build** > **Authentication** > **Settings** tab > **Authorized domains**.
+4. Click **Add domain** and enter your public domain (e.g., `finance.yourdomain.com`), server IP (`123.45.67.89`), or tunnel hostname (`*.trycloudflare.com`).
+
+> [!IMPORTANT]
+> **HTTPS & Session Cookies:** When `NODE_ENV=production`, session cookies are marked `secure: true` (HTTP-only and HTTPS-only). Modern browsers will reject storing the session cookie over unencrypted HTTP on public IPs/domains. **Always terminate SSL (HTTPS)** using one of the reverse proxy or tunnel methods below.
+
+---
+
+### Option A: Cloudflare Tunnel (Recommended for Homelabs & Private Networks)
+
+Cloudflare Tunnel (`cloudflared`) connects your server directly to Cloudflare without opening any firewall ports or port forwarding on your router. It provides free automatic HTTPS, DDoS protection, and works even behind Carrier-Grade NAT (CGNAT).
+
+1. **Install `cloudflared` on your server:**
+   ```bash
+   # Debian / Ubuntu
+   curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+   sudo dpkg -i cloudflared.deb
+   ```
+
+2. **Authenticate with your Cloudflare account:**
+   ```bash
+   cloudflared tunnel login
+   ```
+
+3. **Create a tunnel:**
+   ```bash
+   cloudflared tunnel create finance-tracker
+   ```
+
+4. **Map your domain/subdomain:**
+   ```bash
+   cloudflared tunnel route dns finance-tracker finance.yourdomain.com
+   ```
+
+5. **Start routing traffic to port 3000:**
+   ```bash
+   cloudflared tunnel run --url http://localhost:3000 finance-tracker
+   ```
+
+6. *(Optional)* **Run as a background systemd service:**
+   ```bash
+   sudo cloudflared service install
+   sudo systemctl start cloudflared
+   sudo systemctl enable cloudflared
+   ```
+
+Now your site is accessible over HTTPS at `https://finance.yourdomain.com` with zero exposed router ports!
+
+---
+
+### Option B: Caddy Reverse Proxy (Easiest Automatic HTTPS on Cloud VPS)
+
+If your server has a public static IP and you have pointed a DNS `A` record (`finance.yourdomain.com` -> `YOUR_SERVER_IP`), **Caddy** automatically provisions and renews Let's Encrypt SSL certificates with zero manual certbot commands.
+
+1. **Install Caddy:**
+   ```bash
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+   sudo apt update && sudo apt install caddy
+   ```
+
+2. **Edit `/etc/caddy/Caddyfile`:**
+   ```caddy
+   finance.yourdomain.com {
+       reverse_proxy localhost:3000
+   }
+   ```
+
+3. **Reload Caddy:**
+   ```bash
+   sudo systemctl reload caddy
+   ```
+
+---
+
+### Option C: Nginx Reverse Proxy with Let's Encrypt (Industry Standard VPS)
+
+For Ubuntu/Debian cloud servers running Nginx:
+
+1. **Open Firewall Ports:**
+   ```bash
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw allow OpenSSH
+   sudo ufw enable
+   ```
+
+2. **Install Nginx & Certbot:**
+   ```bash
+   sudo apt update
+   sudo apt install -y nginx certbot python3-certbot-nginx
+   ```
+
+3. **Create Nginx Configuration (`/etc/nginx/sites-available/finance-tracker`):**
+   ```nginx
+   server {
+       server_name finance.yourdomain.com;
+
+       location / {
+           proxy_pass http://127.0.0.1:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   ```
+
+4. **Enable Site & Obtain SSL Certificate:**
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/finance-tracker /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl reload nginx
+   sudo certbot --nginx -d finance.yourdomain.com
+   ```
+
+---
+
+### Option D: Direct Cloud Firewall / Security Group (Quick Access via IP)
+
+If accessing directly via `http://<SERVER_IP>:3000` without a domain name (for internal networks or staging):
+
+1. **Allow Port 3000 in your Cloud Provider's Security Group / Firewall:**
+   - **AWS EC2:** Security Group -> Inbound rules -> Add rule -> Custom TCP, Port `3000`, Source `0.0.0.0/0` (or your personal IP).
+   - **DigitalOcean / Hetzner / Linode:** Cloud Firewall -> Inbound rules -> TCP `3000`.
+   - **Host Firewall (UFW):**
+     ```bash
+     sudo ufw allow 3000/tcp
+     ```
+
+2. **Important Note on Cookies for Direct HTTP:**
+   If accessing via plain HTTP (`http://IP:3000`) rather than HTTPS, modern browsers won't save cookies marked `secure`. For production testing over plain HTTP, either run a reverse proxy with a self-signed certificate, or test via `localhost` SSH tunneling:
+   ```bash
+   # Forward remote server's port 3000 to your local machine:
+   ssh -L 3000:localhost:3000 user@your-server-ip
+   ```
+   Then open `http://localhost:3000` in your local browser (browsers treat `localhost` as a secure origin).
 
 ---
 
